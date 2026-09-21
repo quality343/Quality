@@ -3,6 +3,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { CLINIC_OPS_ROLES, requireRole } from "@/lib/auth/guards";
 import { searchAppointmentsForStaff } from "@/server/services/queries";
+import { isSheetSyncConfigured } from "@/server/services/google-sheets";
 import { AppointmentsTable } from "../appointments/AppointmentsTable";
 
 export const metadata = { title: "Home consultations" };
@@ -85,7 +86,10 @@ export default async function HomeConsultationsPage({
             />
           </div>
         ) : (
-          <AppointmentsTable appointments={appointments} />
+          <AppointmentsTable
+            appointments={appointments}
+            sheetSyncConfigured={isSheetSyncConfigured()}
+          />
         )}
       </Card>
 

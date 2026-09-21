@@ -239,6 +239,13 @@ model Appointment {
   /// Client-supplied idempotency key: retried submissions return the original
   /// booking instead of creating a duplicate.
   idempotencyKey String?       @unique
+  /// Google Sheets is a SECONDARY reporting copy — Turso remains the source of
+  /// truth, so a failed sync never affects the booking. NULL = never attempted,
+  /// otherwise PENDING | SYNCED | FAILED.
+  googleSheetSyncStatus String?
+  googleSheetSyncedAt   DateTime?
+  /// Last sync failure reason, truncated. Never holds a secret.
+  googleSheetSyncError  String?
   createdAt  DateTime          @default(now())
   updatedAt  DateTime @updatedAt
 

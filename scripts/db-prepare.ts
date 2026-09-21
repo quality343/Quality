@@ -33,6 +33,33 @@ const APPLICATION_TABLES = [
   "AuditLog",
 ];
 
+/**
+ * Additive column migrations for databases created before a column existed.
+ *
+ * SQLite has no `ADD COLUMN IF NOT EXISTS`, and re-running an ALTER is an error,
+ * so each entry is checked against `pragma_table_info` first and applied only
+ * when missing. That makes this safe on every deploy: the fresh-database path
+ * gets these columns from the baseline SQL, and an older database catches up
+ * here. Only ever additive — nothing is dropped or rewritten.
+ */
+const COLUMN_ADDITIONS: { table: string; column: string; ddl: string }[] = [
+  {
+    table: "Appointment",
+    column: "googleSheetSyncStatus",
+    ddl: 'ALTER TABLE "Appointment" ADD COLUMN "googleSheetSyncStatus" TEXT',
+  },
+  {
+    table: "Appointment",
+    column: "googleSheetSyncedAt",
+    ddl: 'ALTER TABLE "Appointment" ADD COLUMN "googleSheetSyncedAt" DATETIME',
+  },
+  {
+    table: "Appointment",
+    column: "googleSheetSyncError",
+    ddl: 'ALTER TABLE "Appointment" ADD COLUMN "googleSheetSyncError" TEXT',
+  },
+];
+
 function fail(message: string): never {
   console.error(`[db] ${message}`);
   process.exit(1);
@@ -88,7 +115,23 @@ async function main() {
     );
   }
 
-  console.log(`[db] Schema present (${tables.length} tables), double-booking guard verified.`);
+  // Backfill any additive columns this database predates. Always a no-op once
+  // applied, so it is safe on every deploy.
+  let added = 0;
+  for (const { table, column, ddl } of COLUMN_ADDITIONS) {
+    const info = await client.execute(`PRAGMA table_info("${table}")`);
+    const has = info.rows.some((r) => String(r.name) === column);
+    if (has) continue;
+    await client.execute(ddl);
+    added += 1;
+    console.log(`[db] Added missing column ${table}.${column}`);
+  }
+  if (added > 0) console.log(`[db] Applied ${added} additive column change(s).`);
+
+  console.log(
+    `[db] Schema present (${tables.length} tables), double-booking guard verified` +
+      `${added > 0 ? `, ${added} column(s) added` : ""}.`,
+  );
 }
 
 main().catch((e) => {

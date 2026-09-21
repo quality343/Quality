@@ -22,6 +22,7 @@ import {
   type GuestBookingInput,
 } from "@/lib/validation/scheduling";
 import { recordAuditEventSafe } from "@/lib/audit";
+import { syncAppointmentToSheet } from "@/server/services/google-sheets";
 import { createHash, randomBytes } from "crypto";
 
 // ─── Guest booking (public, no account) ─────────────────────────────────────
@@ -51,7 +52,13 @@ function hashToken(raw: string): string {
  * Returns the appointment plus a one-time manage token (shown once) that lets
  * the visitor view/cancel this booking without an account.
  */
-export async function bookGuestAppointment(raw: unknown) {
+/**
+ * Create the guest appointment. Callers should use `bookGuestAppointment`
+ * below, which also mirrors the booking into the Google Sheet — this inner
+ * function is the original booking path, kept unchanged so the sheet sync stays
+ * a single choke point rather than being sprinkled across both return paths.
+ */
+async function createGuestAppointment(raw: unknown) {
   const input = guestBookingSchema.parse(raw) as GuestBookingInput;
   const isHome = input.appointmentType === "HOME_CONSULTATION";
 
@@ -264,6 +271,32 @@ export async function bookGuestAppointment(raw: unknown) {
  * Guest self-service lookup: booking reference + manage token. The token is
  * compared by hash, so knowing only the reference grants nothing.
  */
+/**
+ * Book a guest appointment, then mirror it into the Google Sheet.
+ *
+ * Order matters and is deliberate:
+ *   1. the appointment is committed to Turso (the source of truth) first;
+ *   2. only then is the sheet contacted, and only as a secondary reporting copy.
+ *
+ * The sync is awaited rather than fired-and-forgotten because a serverless
+ * runtime may freeze the process the moment the response is returned, which
+ * would silently drop the mirror. It cannot fail the booking from the visitor's
+ * point of view: `syncAppointmentToSheet` never throws and records any failure
+ * on the row for an admin to retry. A slow or unreachable sheet therefore costs
+ * at most `GOOGLE_SHEETS_TIMEOUT_MS` of latency, never a booking.
+ */
+export async function bookGuestAppointment(raw: unknown) {
+  const result = await createGuestAppointment(raw);
+  await syncAppointmentToSheet(result.appointment.id).catch((err: unknown) => {
+    // Only reachable if the sync module itself has a bug; still non-fatal.
+    console.error("[google-sheets] unexpected sync error", {
+      appointmentId: result.appointment.id,
+      message: err instanceof Error ? err.message : String(err),
+    });
+  });
+  return result;
+}
+
 export async function getGuestBookingByRefAndToken(bookingRef: string, token: string) {
   const appt = await prisma.appointment.findUnique({
     where: { bookingRef },

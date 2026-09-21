@@ -3,6 +3,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { searchAppointmentsForStaff } from "@/server/services/queries";
+import { isSheetSyncConfigured } from "@/server/services/google-sheets";
 import { AppointmentsTable } from "./AppointmentsTable";
 import { listBranches, listServices } from "@/server/services/queries";
 
@@ -153,7 +154,10 @@ export default async function AdminAppointmentsPage({
             />
           </div>
         ) : (
-          <AppointmentsTable appointments={appointments} />
+          <AppointmentsTable
+            appointments={appointments}
+            sheetSyncConfigured={isSheetSyncConfigured()}
+          />
         )}
       </Card>
     </>

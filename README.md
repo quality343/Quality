@@ -48,6 +48,7 @@ Useful scripts: `npm run typecheck`, `npm run lint`, `npm run build`,
 | `docs/ARCHITECTURE.md` | Target architecture and layer decisions |
 | `docs/DATABASE.md` | Entity-relationship plan for the whole domain |
 | `docs/RBAC.md` | Roles, permission matrix, enforcement points |
+| `docs/google-sheets/README.md` | Appointment → Google Sheets mirror: setup, env vars, failure handling |
 | `docs/DESIGN-SYSTEM.md` | Brand tokens, components, accessibility rules |
 | `docs/ROADMAP.md` | Phases 0–6 in dependency order |
 | `docs/SOURCE-MAP.md` | Source tree map and conventions |

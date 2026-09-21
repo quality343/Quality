@@ -142,6 +142,37 @@ export function checkProductionEnv(
     });
   }
 
+  // ── Google Sheets appointment mirror ─────────────────────────────────────
+  // Optional: without it bookings simply are not mirrored, which is a reporting
+  // gap rather than a broken feature. But a HALF-configured pair is a real trap:
+  // it looks wired up and silently fails every booking, so that is an error.
+  const sheetUrl = env.GOOGLE_SHEETS_WEBHOOK_URL?.trim();
+  const sheetSecret = env.GOOGLE_SHEETS_WEBHOOK_SECRET?.trim();
+  if (sheetUrl && !sheetSecret) {
+    add({
+      level: "error",
+      variable: "GOOGLE_SHEETS_WEBHOOK_SECRET",
+      message: "GOOGLE_SHEETS_WEBHOOK_URL is set but the shared secret is not, so every sync would be rejected.",
+      fix: "Set the same secret value in Netlify and in the Apps Script project properties.",
+    });
+  } else if (sheetSecret && !sheetUrl) {
+    add({
+      level: "error",
+      variable: "GOOGLE_SHEETS_WEBHOOK_URL",
+      message: "GOOGLE_SHEETS_WEBHOOK_SECRET is set but the webhook URL is not.",
+      fix: "Paste the /exec URL from the Apps Script web-app deployment.",
+    });
+  } else if (sheetUrl && !/^https:\/\/script\.google\.com\/macros\/s\/.*\/exec$/.test(sheetUrl)) {
+    // A deployment URL that is not the /exec endpoint usually means the editor
+    // URL or a /dev URL was copied, which only works while signed in.
+    add({
+      level: "warning",
+      variable: "GOOGLE_SHEETS_WEBHOOK_URL",
+      message: "Does not look like an Apps Script web-app URL ending in /exec.",
+      fix: "Use the Web app URL from Deploy → Manage deployments (it ends in /exec, not /dev).",
+    });
+  }
+
   // ── Notification switches ────────────────────────────────────────────────
   // No provider is wired yet; enabling these would claim messages were sent.
   for (const [name, label] of [

@@ -17,7 +17,7 @@ import {
   rescheduleAppointment,
   SlotUnavailableError,
 } from "@/server/services/scheduling";
-import { requireUser } from "@/lib/auth/guards";
+import { CLINIC_OPS_ROLES, requireRoleOrThrow, requireUser } from "@/lib/auth/guards";
 import {
   fieldErrors,
 } from "@/lib/validation/scheduling";
@@ -26,6 +26,7 @@ import {
   NotFoundError,
   ValidationError,
 } from "@/lib/service-errors";
+import { retryAppointmentSheetSync } from "@/server/services/google-sheets";
 
 export type ActionResult<T = undefined> =
   | { ok: true; data?: T; message?: string }
@@ -138,6 +139,41 @@ export async function changeAppointmentStatusAction(raw: {
     revalidatePath("/portal/admin/home-consultations");
     revalidatePath("/portal/patient/appointments");
     return { ok: true, message: "Appointment updated." };
+  } catch (error) {
+    return toActionResult(error);
+  }
+}
+
+/**
+ * Re-push one appointment to the reporting spreadsheet.
+ *
+ * The spreadsheet is a secondary copy — Turso already holds the appointment, so
+ * this never creates or changes a booking. `retryAppointmentSheetSync` forces a
+ * re-send, and the Apps Script dedupes on Appointment ID, so a retry can never
+ * append a second row.
+ */
+export async function retrySheetSyncAction(
+  appointmentId: string,
+): Promise<ActionResult<{ status: string }>> {
+  try {
+    const user = await requireRoleOrThrow(...CLINIC_OPS_ROLES);
+    const result = await retryAppointmentSheetSync(appointmentId);
+    await recordAuditEventSafe({
+      actorId: user.id,
+      action: "APPOINTMENT_SHEET_SYNC_RETRIED",
+      entityType: "Appointment",
+      entityId: appointmentId,
+      metadata: { status: result.status },
+    });
+    revalidatePath("/portal/admin/appointments");
+    revalidatePath("/portal/admin/home-consultations");
+    if (result.ok) {
+      return { ok: true, message: "Synced to Google Sheets.", data: { status: result.status } };
+    }
+    if (result.status === "DISABLED") {
+      return { ok: false, error: "Google Sheets sync is not configured on this deployment." };
+    }
+    return { ok: false, error: `Sync failed again: ${result.error}` };
   } catch (error) {
     return toActionResult(error);
   }

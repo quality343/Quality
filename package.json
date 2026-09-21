@@ -2,7 +2,7 @@
   "name": "quality-hearing-care",
   "version": "0.1.0",
   "private": true,
-  "description": "QUALITY Hearing Care — JOY OF HEARING. Hearing-care platform: public website, patient portal, audiologist/therapist portal, admin portal.",
+  "description": "QUALITY Hearing Care — JOY OF HEARING. Public clinic website with guest appointment booking, home consultation, and a single admin/clinic-staff operations portal.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -19,6 +19,7 @@
     "env:check": "tsx scripts/check-env.ts",
     "test:booking": "tsx scripts/test-guest-booking.ts",
     "test:concurrency": "tsx scripts/test-turso-concurrency.ts",
+    "test:sheets": "tsx scripts/test-google-sheets-sync.ts",
     "build:netlify": "tsx scripts/check-env.ts && tsx scripts/db-prepare.ts && next build"
   },
   "dependencies": {

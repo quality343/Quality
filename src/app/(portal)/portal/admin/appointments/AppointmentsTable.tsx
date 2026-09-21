@@ -2,7 +2,10 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { changeAppointmentStatusAction } from "../../actions-scheduling";
+import {
+  changeAppointmentStatusAction,
+  retrySheetSyncAction,
+} from "../../actions-scheduling";
 import { RescheduleDialog } from "./RescheduleDialog";
 
 type Appt = {
@@ -27,7 +30,27 @@ type Appt = {
   homeConfirmationStatus?: string | null;
   reason?: string | null;
   createdAt?: string;
+  /** Secondary reporting copy — see src/server/services/google-sheets.ts. */
+  sheetSyncStatus?: string | null;
+  sheetSyncedAt?: string | null;
+  sheetSyncError?: string | null;
 };
+
+/**
+ * Spreadsheet sync state, shown narrowly so it never competes with booking
+ * status. A NULL column means the sync was never attempted — which is NOT the
+ * same as the integration being switched off, so the two are labelled apart.
+ */
+const SHEET_TONE: Record<string, { label: string; className: string }> = {
+  SYNCED: { label: "Synced to Google Sheets", className: "bg-emerald-50 text-emerald-700" },
+  PENDING: { label: "Pending sync", className: "bg-amber-50 text-amber-700" },
+  FAILED: { label: "Sync failed", className: "bg-accent-50 text-accent-700" },
+};
+
+/** Never-attempted rows read as pending; only a real status gets a colour. */
+function sheetTone(status: string | null | undefined) {
+  return status ? SHEET_TONE[status] : SHEET_TONE.PENDING;
+}
 
 const NEXT_ACTIONS: Record<string, { status: string; label: string }[]> = {
   BOOKED: [
@@ -51,7 +74,17 @@ const STATUS_TONE: Record<string, string> = {
   NO_SHOW: "bg-accent-50 text-accent-700",
 };
 
-export function AppointmentsTable({ appointments }: { appointments: Appt[] }) {
+/**
+ * `sheetSyncConfigured` comes from the server: a row's own status cannot tell us
+ * whether this deployment has the webhook set up at all.
+ */
+export function AppointmentsTable({
+  appointments,
+  sheetSyncConfigured,
+}: {
+  appointments: Appt[];
+  sheetSyncConfigured: boolean;
+}) {
   return (
     <div className="overflow-x-auto">
       <table className="w-full text-sm">
@@ -69,7 +102,7 @@ export function AppointmentsTable({ appointments }: { appointments: Appt[] }) {
         </thead>
         <tbody>
           {appointments.map((a) => (
-            <AppointmentRow key={a.id} a={a} />
+            <AppointmentRow key={a.id} a={a} sheetSyncConfigured={sheetSyncConfigured} />
           ))}
         </tbody>
       </table>
@@ -77,7 +110,7 @@ export function AppointmentsTable({ appointments }: { appointments: Appt[] }) {
   );
 }
 
-function AppointmentRow({ a }: { a: Appt }) {
+function AppointmentRow({ a, sheetSyncConfigured }: { a: Appt; sheetSyncConfigured: boolean }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -141,6 +174,14 @@ function AppointmentRow({ a }: { a: Appt }) {
           <span className={`rounded-full px-2 py-0.5 text-xs font-semibold ${STATUS_TONE[a.status] ?? "bg-ink-100 text-ink-600"}`}>
             {a.status.replace("_", " ")}
           </span>
+          {sheetSyncConfigured && (
+            <span
+              className={`mt-1 block w-fit rounded-full px-2 py-0.5 text-[10px] font-semibold ${sheetTone(a.sheetSyncStatus).className}`}
+              title={a.sheetSyncError ?? undefined}
+            >
+              {sheetTone(a.sheetSyncStatus).label}
+            </span>
+          )}
         </td>
         <td className="px-4 py-3">
           <div className="flex flex-wrap justify-end gap-1.5">
@@ -228,9 +269,79 @@ function AppointmentRow({ a }: { a: Appt }) {
                 )
               )}
             </dl>
+            <SheetSyncPanel a={a} configured={sheetSyncConfigured} />
           </td>
         </tr>
       )}
     </>
+  );
+}
+
+/**
+ * Staff-only view of the reporting copy, with a retry for a mirror that never
+ * landed. Retrying re-sends the same appointment; the Apps Script keys on
+ * Appointment ID, so it cannot append a duplicate row.
+ */
+function SheetSyncPanel({ a, configured }: { a: Appt; configured: boolean }) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  const [message, setMessage] = useState<{ ok: boolean; text: string } | null>(null);
+
+  function retry() {
+    setMessage(null);
+    startTransition(async () => {
+      const result = await retrySheetSyncAction(a.id);
+      if (result.ok) {
+        setMessage({ ok: true, text: result.message ?? "Synced." });
+        router.refresh();
+      } else {
+        setMessage({ ok: false, text: result.error ?? "Retry failed." });
+      }
+    });
+  }
+
+  const tone = sheetTone(a.sheetSyncStatus);
+
+  return (
+    <div className="mt-3 flex flex-wrap items-center gap-x-3 gap-y-2 border-t border-border/60 pt-3 text-xs">
+      <span className="font-semibold text-ink-600">Google Sheets</span>
+      <span className={`rounded-full px-2 py-0.5 font-semibold ${tone.className}`}>{tone.label}</span>
+      {!configured && (
+        // Offering a retry that cannot work would be worse than saying why.
+        <span className="text-ink-500">
+          The spreadsheet webhook is not configured on this deployment, so nothing has
+          been sent. Set it up and retry.
+        </span>
+      )}
+      {a.sheetSyncedAt && (
+        <span className="text-ink-500">
+          {new Date(a.sheetSyncedAt).toLocaleString("en-IN", {
+            day: "numeric",
+            month: "short",
+            hour: "numeric",
+            minute: "2-digit",
+            hour12: true,
+          })}
+        </span>
+      )}
+      {configured && (
+        <button
+          type="button"
+          onClick={retry}
+          disabled={pending}
+          className="rounded-lg border border-border px-2.5 py-1.5 font-semibold text-ink-700 transition-colors hover:border-brand-300 hover:text-brand-700 disabled:opacity-50"
+        >
+          {pending ? "Retrying…" : "Retry Google Sheets Sync"}
+        </button>
+      )}
+      {a.sheetSyncError && (
+        <span className="w-full text-accent-700">Last error: {a.sheetSyncError}</span>
+      )}
+      {message && (
+        <span role="status" className={`w-full ${message.ok ? "text-emerald-700" : "text-accent-700"}`}>
+          {message.text}
+        </span>
+      )}
+    </div>
   );
 }

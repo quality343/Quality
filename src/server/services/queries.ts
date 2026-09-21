@@ -174,6 +174,11 @@ export async function searchAppointmentsForStaff(opts: AppointmentSearch) {
     reason: a.reason,
     createdAt: a.createdAt.toISOString(),
     email: a.patient.email,
+    // Secondary reporting copy only — surfaced so staff can see and retry a
+    // mirror that never made it to the spreadsheet.
+    sheetSyncStatus: a.googleSheetSyncStatus ?? null,
+    sheetSyncedAt: a.googleSheetSyncedAt?.toISOString() ?? null,
+    sheetSyncError: a.googleSheetSyncError ?? null,
   }));
 }
 

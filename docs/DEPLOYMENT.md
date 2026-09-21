@@ -26,8 +26,11 @@ verified against `src/lib/env.ts`, `src/lib/env-guard.ts` and
 | `AUTH_SECRET` | server | `openssl rand -base64 32` | Auth.js cannot sign sessions — `/login` is unusable. Use a **different value per environment**; never reuse the dev one. |
 | `AUTH_TRUST_HOST` | server | `true` | **The one that bites.** Auth.js v5 auto-trusts the host only on Vercel/Cloudflare. On Netlify's proxy, staff sign-in fails with `UntrustedHost`. |
 | `NEXT_PUBLIC_SITE_URL` | build + client | `https://qualityhearing.netlify.app` (or the custom domain) | Canonical tags, `sitemap.xml` and `robots.txt` emit `localhost:3000`. Inlined at **build time** — changing it needs a redeploy, not a restart. |
+| `GOOGLE_SHEETS_WEBHOOK_URL` | server | The Apps Script web-app URL, ending in **`/exec`** | Appointments are not mirrored to the spreadsheet. Bookings still work. |
+| `GOOGLE_SHEETS_WEBHOOK_SECRET` | server | `openssl rand -hex 32`, matching `SHEET_WEBHOOK_SECRET` in the Apps Script | Same, plus the build fails if only one of the pair is set. |
 
-`TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN` and `AUTH_SECRET` are secrets: put them
+`TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN`, `AUTH_SECRET` and
+`GOOGLE_SHEETS_WEBHOOK_SECRET` are secrets: put them
 in the Netlify UI only, never in `netlify.toml` (which is committed). Never give
 one a `NEXT_PUBLIC_` prefix — that would ship it to every browser. Any PostgreSQL
 `DATABASE_URL`/`DIRECT_URL` left over from before the migration are ignored by
@@ -40,6 +43,7 @@ the application and can be deleted from Netlify.
 | `SKIP_DB_MIGRATE` | unset | Set `true` for a branch/preview deploy that must build without touching the database. |
 | `SKIP_ENV_CHECK` | unset | Set `true` to bypass the build-time environment check. Emergency use only. |
 | `NOTIFY_EMAIL` / `NOTIFY_SMS` | unset | **Leave unset.** No provider is implemented; enabling them would claim messages were sent. See `src/lib/notifications.ts` for the integration point. |
+| `GOOGLE_SHEETS_TIMEOUT_MS` | `8000` | How long a booking waits for the spreadsheet before giving up. The mirror is best-effort, so keep this small. |
 | `ADMIN_*` | unset | Used only by the one-time admin provisioning command (§5). Delete after running. |
 | `SUPER_ADMIN_*` | unset | Legacy bootstrap for a **deferred** role. Leave unset for this product. |
 
