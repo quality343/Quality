@@ -1,3 +1,15 @@
+/**
+ * ⚠️ DEFERRED — NOT WIRED TO ANY ROUTE.
+ *
+ * Patient self-registration is not part of the current product: visitors book as
+ * guests and never create an account. The `/register` page and its server action
+ * were removed, so nothing in the app calls `registerPatient` any more.
+ *
+ * This module is kept because it is correct, tested work that a future phase may
+ * want back — but it must not be re-exposed without a deliberate decision, since
+ * it is the one place that can create a PATIENT account. See docs/RBAC.md
+ * (deferred roles) and docs/SCOPE-REVISION.md.
+ */
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/server/db/prisma";
 import { registerSchema, type RegisterInput } from "@/lib/validation/auth";

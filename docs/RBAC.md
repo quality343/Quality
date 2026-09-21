@@ -100,9 +100,55 @@ reachable over HTTP; their values live only in those scripts and in the operator
 environment. Production accounts must be provisioned with a unique password — see
 `docs/AUTH.md` §7.
 
+### 6.1 Account consolidation (2026-09-21)
+
+The account list held 13 logins, all inherited from earlier phases. It was reduced to the
+single operational administrator:
+
+| | |
+|---|---|
+| **Active** | `qualityhearing.pro@gmail.com` — role `ADMIN`, linked to Kukatpally (KPHB) |
+| **Deactivated** | 12 accounts (test artifacts, demo accounts, and the deferred legacy roles) |
+| **Deleted** | none — see below |
+
+**Why deactivate instead of delete.** `authorize()` already refuses an inactive user and
+records `auth.login.blocked_inactive`, so `isActive = false` is a real lockout, not a
+cosmetic flag. Deleting would have been actively harmful: `Staff.userId` is
+`ON DELETE RESTRICT`, so the delete fails for anyone with a staff row, while
+`AuditLog.actorId`, `Appointment.bookedById`, `Notification.userId` and `Patient.userId`
+are `ON DELETE SET NULL` — silently erasing *who did what* from the audit trail and
+detaching a patient's history. Every one of the 12 accounts in fact had references
+(audit rows, a staff row, or a patient row), so none could be removed without loss.
+Nothing was deleted, and appointments, services, branches, slots and audit records are
+untouched.
+
+**Legacy roles retired** (accounts deactivated, portals already closed): `CLINIC_STAFF`,
+`AUDIOLOGIST`, `SUPER_ADMIN`, plus the `PATIENT` test logins. They remain valid values in
+the `role` column — see §2 — but no active account holds one.
+
+Maintenance script: `npx tsx scripts/consolidate-admin-accounts.ts` (reports by default;
+`--apply` acts). It is idempotent, keeps the designated admin active **before** touching
+anything else so the clinic cannot be locked out, and writes an
+`admin.accounts.consolidated` audit event.
+
+**One caveat worth understanding.** Sessions are JWTs, so a session issued *before* an
+account was deactivated stays valid until it expires (8 hours) even though that account can
+no longer sign in. Nothing in the current list had an outstanding session, but if you ever
+deactivate a compromised account, also rotate `AUTH_SECRET` to invalidate every existing
+token immediately.
+
+**Keeping it clean.** `scripts/test-phases-2-3.ts` creates throwaway accounts
+(`…@test.local`) and deletes them again in its `finally` block — verified: running the full
+suite against the live database leaves exactly the one active admin. Their credentials live
+only in those scripts, as §6 describes. Do not leave those accounts behind, and never let
+one hold role `ADMIN` in production.
+
 ## 7. Upgrade path
 
-The starter stores a single `role` enum on `users`. If per-user overrides, multiple roles
-per person, or a real multi-branch product return later, add `roles` + `user_roles` join
-tables and swap `roleHasPermission()` internals — call sites (`requireRole`,
-`requirePermissionOrThrow`) do not change.
+The starter stores a single `role` text column on `users` (it was a PostgreSQL enum before
+the Turso migration — SQLite cannot express one, so the vocabulary lives in
+`src/lib/rbac/roles.ts` and the database no longer rejects an unknown value; authorization
+still fails closed). If per-user overrides, multiple roles per person, or a real
+multi-branch product return later, add `roles` + `user_roles` join tables and swap
+`roleHasPermission()` internals — call sites (`requireRole`, `requirePermissionOrThrow`)
+do not change.
