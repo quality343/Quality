@@ -3,6 +3,7 @@ import { PageHero } from "@/components/layout/PageHero";
 import { PHOTOS } from "@/lib/images";
 import { SoundBars } from "@/components/brand/SoundWave";
 import { Reveal } from "@/components/motion/Reveal";
+import { TestimonialVideos } from "@/components/media/TestimonialVideos";
 import { CLIENT } from "@/lib/client-info";
 
 export const metadata = {
@@ -133,6 +134,11 @@ export default function AboutPage() {
           </Reveal>
         </Container>
       </section>
+
+      {/* Patient testimonial videos. Renders nothing until the clinic supplies
+          a recording and the patient has approved its use — there are no
+          invented patients here, and there never will be. */}
+      <TestimonialVideos />
 
       {/* Clinic + contact */}
       <section className="bg-surface">

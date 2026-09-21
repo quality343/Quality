@@ -5,6 +5,8 @@ import { PageHero } from "@/components/layout/PageHero";
 import { PHOTOS } from "@/lib/images";
 import { SoundBars } from "@/components/brand/SoundWave";
 import { Reveal } from "@/components/motion/Reveal";
+import { VideoSection } from "@/components/media/VideoSection";
+import { VIDEO } from "@/lib/media";
 import { CLIENT } from "@/lib/client-info";
 
 export const metadata: Metadata = {
@@ -108,6 +110,11 @@ export default function HomeConsultationPage() {
           </div>
         </Container>
       </section>
+
+      {/* Video — what a home visit involves. Sits after the reassurances and
+          before the request steps, so it answers questions before asking for
+          an address. */}
+      <VideoSection slot={VIDEO.homeConsultation} tone="tinted" />
 
       <section className="bg-surface">
         <Container className="py-14 sm:py-20">

@@ -4,6 +4,8 @@ import { Button, Container, Icon } from "@/components/ui";
 import { PageHero } from "@/components/layout/PageHero";
 import { PHOTOS } from "@/lib/images";
 import { Reveal } from "@/components/motion/Reveal";
+import { VideoSection } from "@/components/media/VideoSection";
+import { SERVICE_VIDEOS } from "@/lib/media";
 import { prisma } from "@/server/db/prisma";
 import { CLIENT } from "@/lib/client-info";
 
@@ -196,6 +198,13 @@ export default async function ServiceDetailPage({ params }: { params: Params }) 
           </div>
         </Container>
       </section>
+
+      {/* Optional short clip for this service, keyed by URL slug in
+          `SERVICE_VIDEOS` (src/lib/media.ts). Nothing renders while unconfigured,
+          so the catalogue page is untouched until footage exists. */}
+      {SERVICE_VIDEOS[slug.toLowerCase()] ? (
+        <VideoSection slot={SERVICE_VIDEOS[slug.toLowerCase()]} tone="surface" />
+      ) : null}
     </>
   );
 }

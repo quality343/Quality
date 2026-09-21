@@ -5,7 +5,9 @@ import { HearingAidDevice } from "@/components/brand/HearingAidDevice";
 import { AudiogramExplainer } from "@/components/brand/SoundWave";
 import { Reveal } from "@/components/motion/Reveal";
 import { Photo } from "@/components/media/Photo";
-import { VideoShowcase } from "@/components/media/VideoShowcase";
+import { HeroVideo } from "@/components/media/HeroVideo";
+import { VideoSection } from "@/components/media/VideoSection";
+import { VIDEO } from "@/lib/media";
 import { HearingSelfCheck } from "@/components/hearing/HearingSelfCheck";
 import { CLIENT } from "@/lib/client-info";
 import { PHOTOS } from "@/lib/images";
@@ -143,6 +145,9 @@ export default async function HomePage() {
     <>
       {/* ══ 1. HERO ═══════════════════════════════════════════════════ */}
       <section className="bg-hero relative overflow-hidden text-white">
+        {/* Optional cinematic background. Renders nothing until the clinic
+            supplies a clip; the gradient above is the permanent fallback. */}
+        <HeroVideo />
         <div className="dot-grid absolute inset-0 opacity-60" aria-hidden="true" />
         <Container className="relative grid items-center gap-12 py-14 sm:py-20 lg:grid-cols-[1.05fr_0.95fr] lg:gap-8 lg:py-24">
           <div className="animate-fade-up">
@@ -429,10 +434,12 @@ export default async function HomePage() {
       </section>
 
       {/* ══ CLINIC VIDEO ═════════════════════════════════════════════
-          Placed after the services section and before the product
-          showcase. Renders nothing in production until the clinic
-          supplies a clip — see src/lib/media.ts. */}
-      <VideoShowcase />
+          Sits after the services section and before the product showcase —
+          after the visitor has seen what we do, and before they look at
+          devices. Until the clinic supplies footage this is a complete
+          section in its own right: photograph, heading, text and CTA, with no
+          play button (a play button that does nothing is a broken player). */}
+      <VideoSection slot={VIDEO.hearingCareMatters} tone="surface" />
 
       {/* ══ 5. HEARING-AID SHOWCASE ══════════════════════════════════ */}
       <section className="relative overflow-hidden bg-brand-950 text-white">
@@ -1017,27 +1024,31 @@ export default async function HomePage() {
         />
 
         <Container className="relative flex flex-col items-start gap-8 py-16 sm:py-20 lg:flex-row lg:items-center lg:justify-between">
+          {/* Copy comes from the `finalCta` video slot so the section and the
+              video content cannot drift apart. */}
           <Reveal>
-            <h2 className="headline text-3xl sm:text-4xl">Ready to hear better?</h2>
-            <p className="mt-3 max-w-xl text-brand-100/90">
-              Book a hearing assessment at our Kukatpally clinic, or request a
-              home consultation. It takes about a minute — and you don&apos;t
-              need an account.
-            </p>
+            <p className="eyebrow text-brand-200">{VIDEO.finalCta.eyebrow}</p>
+            <h2 className="headline mt-3 text-3xl sm:text-4xl">{VIDEO.finalCta.title}</h2>
+            <p className="mt-3 max-w-xl text-brand-100/90">{VIDEO.finalCta.description}</p>
           </Reveal>
           <Reveal delay={90} className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">
-            <Button href="/book-appointment" variant="accent" size="lg" className="btn-lift shrink-0">
+            <Button
+              href={VIDEO.finalCta.cta.href}
+              variant="accent"
+              size="lg"
+              className="btn-lift shrink-0"
+            >
               <Icon name="calendar" className="h-5 w-5" />
-              Book Appointment
+              {VIDEO.finalCta.cta.label}
             </Button>
             <Button
-              href={CLIENT.phoneHref}
+              href={VIDEO.finalCta.secondaryCta.href}
               variant="secondary"
               size="lg"
               className="btn-lift shrink-0 !border-white/25 !bg-white/[0.08] !text-white hover:!border-white/50 hover:!text-white"
             >
-              <Icon name="phone" className="h-5 w-5" />
-              Call {CLIENT.phone}
+              <Icon name="home" className="h-5 w-5" />
+              {VIDEO.finalCta.secondaryCta.label}
             </Button>
           </Reveal>
         </Container>

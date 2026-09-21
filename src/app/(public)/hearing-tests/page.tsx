@@ -4,6 +4,8 @@ import { PageHero } from "@/components/layout/PageHero";
 import { PHOTOS } from "@/lib/images";
 import { AudiogramExplainer } from "@/components/brand/SoundWave";
 import { Reveal } from "@/components/motion/Reveal";
+import { VideoSection } from "@/components/media/VideoSection";
+import { VIDEO } from "@/lib/media";
 import { prisma } from "@/server/db/prisma";
 
 export const metadata = {
@@ -141,6 +143,10 @@ export default async function HearingTestsPage() {
           </div>
         </Container>
       </section>
+
+      {/* Video — what an assessment involves, explained before the list of
+          tests so a visitor knows what they are choosing between. */}
+      <VideoSection slot={VIDEO.hearingTest} tone="tinted" />
 
       {/* Test catalogue */}
       <section className="bg-surface">

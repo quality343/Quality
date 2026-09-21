@@ -4,6 +4,8 @@ import { PageHero } from "@/components/layout/PageHero";
 import { PHOTOS } from "@/lib/images";
 import { HearingAidDevice } from "@/components/brand/HearingAidDevice";
 import { Reveal } from "@/components/motion/Reveal";
+import { VideoSection } from "@/components/media/VideoSection";
+import { VIDEO } from "@/lib/media";
 import { deviceTypeLabel, techLevelLabel } from "@/lib/hearing-aids";
 import { prisma } from "@/server/db/prisma";
 import { CLIENT } from "@/lib/client-info";
@@ -346,6 +348,10 @@ export default async function HearingAidsPage() {
           )}
         </Container>
       </section>
+
+      {/* Video — what the devices are actually like, placed after the catalogue
+          and before the fitting steps. Educational only: it recommends nothing. */}
+      <VideoSection slot={VIDEO.hearingAids} tone="muted" />
 
       {/* Fitting journey */}
       <section className="bg-surface">
