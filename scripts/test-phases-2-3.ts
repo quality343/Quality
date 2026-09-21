@@ -23,6 +23,18 @@ function check(name: string, cond: boolean, detail?: string) {
 
 const TAG = `${Date.now().toString(36)}`;
 let userSeq = 0;
+
+/**
+ * Slot dates must be in the future — `bookAppointment` correctly refuses a slot
+ * whose start time has already passed, so a hardcoded date silently turns into
+ * a failing suite once that day goes by.
+ */
+function futureDate(daysAhead: number): string {
+  const d = new Date();
+  d.setDate(d.getDate() + daysAhead);
+  return d.toISOString().slice(0, 10);
+}
+
 const cleanupIds: { email: string }[] = [];
 
 async function makeUser(role: string, branchId?: string) {
@@ -71,12 +83,12 @@ async function main() {
   const { generateSlots, bookAppointment, changeAppointmentStatus, SlotUnavailableError } = await import("../src/server/services/scheduling");
 
   const created = await generateSlots(clinicSession, {
-    branchId: branch.id, serviceId: service.id, date: "2026-09-20", startTime: "09:00", endTime: "11:00", slotMinutes: 30,
+    branchId: branch.id, serviceId: service.id, date: futureDate(7), startTime: "09:00", endTime: "11:00", slotMinutes: 30,
   });
   check("slot generation creates 4 slots", created === 4, `got ${created}`);
 
   const again = await generateSlots(clinicSession, {
-    branchId: branch.id, serviceId: service.id, date: "2026-09-20", startTime: "09:00", endTime: "11:00", slotMinutes: 30,
+    branchId: branch.id, serviceId: service.id, date: futureDate(7), startTime: "09:00", endTime: "11:00", slotMinutes: 30,
   });
   check("slot regeneration is idempotent", again === 0, `got ${again}`);
 

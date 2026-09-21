@@ -9,10 +9,14 @@
     "start": "next start",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
+    "postinstall": "prisma generate",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
-    "db:studio": "prisma studio"
+    "db:studio": "prisma studio",
+    "admin:provision": "tsx scripts/provision-admin.ts",
+    "env:check": "tsx scripts/check-env.ts",
+    "build:netlify": "tsx scripts/check-env.ts && tsx scripts/migrate-deploy.ts && next build"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.3",
