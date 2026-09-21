@@ -76,10 +76,12 @@ One tab, named exactly **`Appointments`**, with this column order (enforced by
    Copy the **`/exec`** URL.
 6. In Netlify: add `GOOGLE_SHEETS_WEBHOOK_URL` (the `/exec` URL) and
    `GOOGLE_SHEETS_WEBHOOK_SECRET`, then redeploy.
-7. Book a test appointment on the site and confirm exactly one row appears, with
+7. Confirm the deployment works before booking anything: `npm run verify:sheets`
+   (see below).
+8. Book a test appointment on the site and confirm exactly one row appears, with
    an Appointment ID matching the confirmation screen.
-8. Delete the test row when you're done (the sheet is a mirror, so the row will
-   simply be re-appended if that appointment is ever retried).
+9. Delete the test rows when you're done (the sheet is a mirror, so a row is
+   simply re-appended if that appointment is ever retried).
 
 > Access must be *Anyone*, otherwise Google redirects the server-to-server POST to
 > a login page and every sync fails. That is safe here because the request has to
@@ -120,6 +122,31 @@ Deliberately not implemented: no queue, no cron retry. A clinic-sized volume of
 bookings does not justify the machinery, and a human retry that reports its
 outcome honestly is better than a background job that fails silently.
 
+## Verify the real webhook
+
+Once the Apps Script is deployed, run this against it — it is the only check
+that proves the *live* endpoint works, and it needs no database:
+
+```bash
+npm run verify:sheets
+```
+
+It reports on the deployment itself: reachable at all, answering our script's
+JSON rather than a Google sign-in page (which is what *access: Anyone* prevents),
+refusing an unsigned and a wrongly-signed request, appending one clearly-marked
+`QHC-SETUPCHECK-…` row, and refusing to append it a second time. **Delete that
+row afterwards** — it is a mirror row with no appointment behind it, so it will
+never be updated.
+
+Useful failure readings:
+
+| Output | Meaning |
+|---|---|
+| `GET /exec responds` fails | Wrong URL, or the deployment is not published. |
+| *not our script's JSON* | Access is not *Anyone*, so Google served a login page. |
+| `Invalid signature` on the valid request | `GOOGLE_SHEETS_WEBHOOK_SECRET` ≠ `SHEET_WEBHOOK_SECRET`. |
+| `Signature expired` | Server clock skew of more than 5 minutes. |
+
 ## Tests
 
 ```bash
@@ -139,8 +166,9 @@ body, 5-minute freshness window, dedupe on Appointment ID). It covers:
 - an unconfigured deployment reporting `DISABLED` without corrupting the last
   good status.
 
-**Not covered, and it needs the clinic's Google account:** the deployed Apps
-Script and the real spreadsheet. Nothing here can prove a row lands in the
-clinic's actual sheet — that requires deploying the web app (Setup, steps 1–5)
-and booking one real appointment end to end. Until that has been done and the
-row seen, treat the Google side as unverified.
+**Not covered here:** the deployed Apps Script and the real spreadsheet, because
+deploying the web app needs the clinic's Google account. `npm run verify:sheets`
+closes most of that gap (it exercises the real deployment), but the final
+confirmation still requires deploying the web app (Setup, steps 1–5) and booking
+one real appointment end to end. Until that has been done and the row seen, treat
+the Google side as unverified.

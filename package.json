@@ -20,6 +20,7 @@
     "test:booking": "tsx scripts/test-guest-booking.ts",
     "test:concurrency": "tsx scripts/test-turso-concurrency.ts",
     "test:sheets": "tsx scripts/test-google-sheets-sync.ts",
+    "verify:sheets": "tsx scripts/verify-sheets-webhook.ts",
     "build:netlify": "tsx scripts/check-env.ts && tsx scripts/db-prepare.ts && next build"
   },
   "dependencies": {
