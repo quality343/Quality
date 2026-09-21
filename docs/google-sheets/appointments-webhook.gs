@@ -87,6 +87,74 @@ function getSheet_() {
   return sheet;
 }
 
+/**
+ * Run this by hand when setup looks done but nothing reaches the sheet.
+ *
+ * Selecting `setupSheet` and clicking Run only ever prints "Execution completed"
+ * — the editor does not show a function's return value — so a run gives you no
+ * evidence either way. This prints a real checklist to the Execution log
+ * instead. It never prints the secret, only its length and first 4 characters,
+ * so the output is safe to screenshot or share.
+ */
+function diagnose() {
+  var props = PropertiesService.getScriptProperties();
+  var secret = props.getProperty('SHEET_WEBHOOK_SECRET');
+
+  Logger.log('=== QUALITY Hearing Care — webhook self-check ===');
+
+  if (!secret) {
+    Logger.log('✘ SHEET_WEBHOOK_SECRET is MISSING — every request will fail.');
+    Logger.log('  Project Settings → Script properties → add SHEET_WEBHOOK_SECRET.');
+  } else if (secret.length !== 64) {
+    Logger.log('✘ SHEET_WEBHOOK_SECRET is ' + secret.length + ' chars, expected 64.');
+    Logger.log('  Check for a stray space or a partial paste.');
+  } else {
+    Logger.log('✔ SHEET_WEBHOOK_SECRET set (' + secret.length + ' chars), starts ' + secret.substring(0, 4) + '…');
+    Logger.log('  It must be IDENTICAL to GOOGLE_SHEETS_WEBHOOK_SECRET on the server.');
+  }
+
+  var id = props.getProperty('SPREADSHEET_ID');
+  Logger.log(id ? '✔ SPREADSHEET_ID set explicitly.' : '· No SPREADSHEET_ID — using the bound spreadsheet.');
+
+  var ss = null;
+  try {
+    ss = id ? SpreadsheetApp.openById(id) : SpreadsheetApp.getActiveSpreadsheet();
+  } catch (e) {
+    ss = null;
+  }
+  if (!ss) {
+    Logger.log('✘ No spreadsheet reachable — bind this script to the sheet, or set SPREADSHEET_ID.');
+    return;
+  }
+  Logger.log('✔ Spreadsheet: "' + ss.getName() + '"');
+
+  var sheet = ss.getSheetByName(SHEET_NAME);
+  if (!sheet) {
+    Logger.log('✘ No tab named "' + SHEET_NAME + '" — run setupSheet() first.');
+    return;
+  }
+  Logger.log('✔ Tab "' + SHEET_NAME + '" present, ' + Math.max(0, sheet.getLastRow() - 1) + ' appointment row(s).');
+
+  var header = sheet.getLastRow() > 0 ? sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0] : [];
+  var wrong = [];
+  for (var i = 0; i < COLUMNS.length; i++) {
+    if (String(header[i] || '') !== COLUMNS[i]) {
+      wrong.push('col ' + (i + 1) + ': expected "' + COLUMNS[i] + '", found "' + header[i] + '"');
+    }
+  }
+  if (wrong.length) {
+    Logger.log('✘ Header row does not match. Delete row 1, then run setupSheet():');
+    wrong.forEach(function (w) {
+      Logger.log('    - ' + w);
+    });
+  } else {
+    Logger.log('✔ Header row matches all 12 columns.');
+  }
+
+  Logger.log('Next: Deploy → New deployment → Web app (Execute as: Me, access: Anyone),');
+  Logger.log('then run `npm run verify:sheets` against the /exec URL.');
+}
+
 /* ── Entry point ─────────────────────────────────────────────────────────── */
 
 function doPost(e) {

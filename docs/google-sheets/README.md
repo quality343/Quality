@@ -122,6 +122,18 @@ Deliberately not implemented: no queue, no cron retry. A clinic-sized volume of
 bookings does not justify the machinery, and a human retry that reports its
 outcome honestly is better than a background job that fails silently.
 
+## Self-check inside the Apps Script editor
+
+Selecting `setupSheet` and clicking **Run** only ever prints *"Execution
+completed"* — the editor does not show a function's return value — so that run
+tells you nothing either way. Run **`diagnose`** instead: it prints a checklist to
+the Execution log (secret present and the right length, spreadsheet reachable,
+the tab exists, the 12 headers match, and what to do next).
+
+It prints the secret's length and first 4 characters, never the value, so the
+output is safe to screenshot. `setupSheet` itself is idempotent: running it again
+will not add a second header row.
+
 ## Verify the real webhook
 
 Once the Apps Script is deployed, run this against it — it is the only check
