@@ -224,6 +224,43 @@ export function signPayload(secret: string, timestamp: string, body: string): st
   return createHmac("sha256", secret).update(`${timestamp}.${body}`).digest("hex");
 }
 
+/**
+ * JSON with every non-ASCII character escaped as `\uXXXX`.
+ *
+ * This is not cosmetic — it is what makes the signature verifiable at all.
+ *
+ * The receiver checks the HMAC over the RAW body text, so its copy of that text
+ * has to be byte-identical to ours. It is not, when the body contains non-ASCII
+ * characters: Apps Script's `e.postData.contents` does not hand back the
+ * UTF-8-decoded string, so a single `—` (three UTF-8 bytes) arrives as three
+ * characters instead of one and every signature over it fails.
+ *
+ * That failure is invisible on a purely ASCII body, which is why it survived the
+ * local test suite — the local receiver decodes UTF-8 correctly, exactly as we
+ * do, so it agreed with a mistake made on both sides. The first live request
+ * that carried a non-ASCII character (a middle dot in the notes separator, or
+ * any patient name or address outside ASCII) would have failed to mirror.
+ *
+ * Escaping to `\uXXXX` makes the body pure ASCII, so both sides hash the same
+ * bytes no matter how either one treats multi-byte input. `JSON.parse` in the
+ * Apps Script restores the original characters, so the spreadsheet still shows
+ * the real name and address.
+ */
+function asciiJson(value: unknown): string {
+  return JSON.stringify(value).replace(
+    /[\u0080-\uffff]/g,
+    (ch) => `\\u${ch.charCodeAt(0).toString(16).padStart(4, "0")}`,
+  );
+}
+
+/**
+ * The exact body we sign and send. Exported so tests can assert it is ASCII-only
+ * — the invariant that keeps the signature valid.
+ */
+export function buildWebhookBody(row: SheetRow): string {
+  return asciiJson({ sheet: "Appointments", row });
+}
+
 /** Constant-time signature comparison (mirrors the Apps Script's check). */
 export function signatureMatches(secret: string, timestamp: string, body: string, provided: string): boolean {
   const expected = signPayload(secret, timestamp, body);
@@ -299,7 +336,7 @@ export async function syncAppointmentToSheet(
       data: { googleSheetSyncStatus: "PENDING" },
     });
 
-    const body = JSON.stringify({ sheet: "Appointments", row });
+    const body = buildWebhookBody(row);
     const timestamp = new Date().toISOString();
     const signature = signPayload(
       process.env.GOOGLE_SHEETS_WEBHOOK_SECRET!.trim(),

@@ -18,7 +18,12 @@
 
 import { randomBytes } from "node:crypto";
 import { loadLocalEnv } from "./load-local-env";
-import { signPayload, SHEET_COLUMNS } from "../src/server/services/google-sheets";
+import {
+  buildWebhookBody,
+  signPayload,
+  SHEET_COLUMNS,
+  type SheetRow,
+} from "../src/server/services/google-sheets";
 
 loadLocalEnv();
 
@@ -120,8 +125,15 @@ function describe(err: unknown): string {
       : String(err);
 }
 
-/** A row that is unmistakably not a real patient. */
-function setupRow() {
+/**
+ * A row that is unmistakably not a real patient.
+ *
+ * The em dashes are deliberate: they make this the live regression check for the
+ * body-encoding bug, where a non-ASCII character in the raw body changes the
+ * signature the receiver computes. A purely ASCII row would pass even when that
+ * bug is present, so do not "simplify" these to hyphens.
+ */
+function setupRow(): SheetRow {
   const stamp = new Date().toISOString().replace(/[-:T]/g, "").slice(0, 14);
   return {
     "Appointment ID": `QHC-SETUPCHECK-${stamp}`,
@@ -174,7 +186,7 @@ async function main() {
 
   /* 2. Are unsigned and badly-signed requests actually refused? */
   console.log("\n2. Unauthorized requests are refused");
-  const unsignedBody = JSON.stringify({ sheet: "Appointments", row: setupRow() });
+  const unsignedBody = buildWebhookBody(setupRow());
   const t1 = new Date().toISOString();
   const unsigned = await post(unsignedBody, t1, "0".repeat(64));
   check(
@@ -194,7 +206,17 @@ async function main() {
   /* 3. Does a valid request append the row? */
   console.log("\n3. A valid request appends exactly one row");
   const row = setupRow();
-  const body = JSON.stringify({ sheet: "Appointments", row });
+  const body = buildWebhookBody(row);
+
+  /* The signature covers the raw body text, so assert it is ASCII-only before
+     sending: a non-ASCII byte makes the receiver hash different bytes and the
+     request is rejected as an invalid signature, with nothing else to go on. */
+  check(
+    "request body is pure ASCII (signature is over raw text)",
+    /^[\x00-\x7F]*$/.test(body),
+    "a non-ASCII character here breaks the signature against the live webhook",
+  );
+
   const ts3 = new Date().toISOString();
   const signed = await post(body, ts3, signPayload(secret, ts3, body));
   const signedOk = "json" in signed && signed.json?.ok === true;

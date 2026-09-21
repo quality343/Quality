@@ -16,6 +16,7 @@ import { createHmac, randomBytes } from "node:crypto";
 import { createPrismaClient } from "./db";
 import {
   buildSheetRow,
+  buildWebhookBody,
   isSheetSyncConfigured,
   retryAppointmentSheetSync,
   SHEET_COLUMNS,
@@ -196,6 +197,63 @@ async function main() {
 
   console.log("── Configuration ──");
   check("configured when both vars are present", isSheetSyncConfigured() === true);
+
+  /*
+   * Body encoding.
+   *
+   * The receiver checks the HMAC over the RAW body, so its copy of that text must
+   * be byte-identical to ours. Apps Script's `e.postData.contents` does NOT
+   * UTF-8-decode the body, so a non-ASCII character arrives as several characters
+   * and every signature over it fails.
+   *
+   * These assertions are the ONLY way to catch that, because the receiver running
+   * below decodes UTF-8 exactly as we do — it agreed with the bug happily. The
+   * live deployment did not, and rejected a row containing a single em dash.
+   */
+  console.log("\n── Body encoding (signature is over raw text) ──");
+  const unicodeRow = buildSheetRow({
+    id: "unicode-fixture",
+    bookingRef: "QHC-UNICODETEST",
+    status: "BOOKED",
+    appointmentType: "HOME_CONSULTATION",
+    reason: "Preferred: 2026-10-06 (morning) \u2014 steps to the first floor",
+    homeAddress: "MIG 215, above RK Collections",
+    homeLocality: "Kukatpally Housing Board Colony",
+    homeInstructions: "Please ring the bell twice",
+    homeConfirmationStatus: "REQUIRES_CONFIRMATION",
+    createdAt: new Date("2026-09-21T12:00:00Z"),
+    patient: { name: "Ravi Kumar \u2014 \u0930\u0935\u093f", phone: "9966111188", email: null },
+    service: { name: "Hearing Assessment" },
+    branch: { name: "Kukatpally", address: "MIG 215, KPHB Phase 1", city: "Hyderabad" },
+    slot: null,
+  });
+  const unicodeBody = buildWebhookBody(unicodeRow);
+
+  check("row really does contain non-ASCII text", /[^\x00-\x7F]/.test(unicodeRow["Patient Name"]));
+  check("the notes separator is non-ASCII too", /[^\x00-\x7F]/.test(unicodeRow.Notes));
+  check(
+    "request body is pure ASCII",
+    /^[\x00-\x7F]*$/.test(unicodeBody),
+    "a non-ASCII byte would break the signature against the live webhook",
+  );
+
+  let decoded: { row: Record<string, string> } | null = null;
+  try {
+    decoded = JSON.parse(unicodeBody) as { row: Record<string, string> };
+  } catch {
+    decoded = null;
+  }
+  check("body is still valid JSON", decoded !== null);
+  check(
+    "non-ASCII characters survive the round trip",
+    decoded?.row["Patient Name"] === unicodeRow["Patient Name"],
+    `got ${JSON.stringify(decoded?.row["Patient Name"])}`,
+  );
+  check(
+    "the middle-dot separator survives too",
+    decoded?.row.Notes === unicodeRow.Notes,
+    `got ${JSON.stringify(decoded?.row.Notes)}`,
+  );
 
   /* TEST 1 — clinic visit */
   console.log("\n── TEST 1: clinic appointment ──");
