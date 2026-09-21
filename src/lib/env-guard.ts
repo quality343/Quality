@@ -38,55 +38,57 @@ function isLocalHost(host: string | null): boolean {
   return host !== null && LOCAL_HOSTS.includes(host);
 }
 
-/**
- * Signals a pooled (transaction-mode) connection. Prisma needs a *direct*
- * connection to run migrations, so a match here means `DIRECT_URL` should be set.
- */
-function looksPooled(url: string | undefined): boolean {
-  if (!url) return false;
-  const lower = url.toLowerCase();
-  return (
-    lower.includes("-pooler.") ||
-    lower.includes("pgbouncer=true") ||
-    lower.includes(":6543/") ||
-    lower.includes("pooled")
-  );
-}
-
 export function checkProductionEnv(
   env: NodeJS.ProcessEnv = process.env,
 ): EnvFinding[] {
   const findings: EnvFinding[] = [];
   const add = (f: EnvFinding) => findings.push(f);
 
-  // ── DATABASE_URL ──────────────────────────────────────────────────────────
-  const databaseUrl = env.DATABASE_URL?.trim();
-  if (!databaseUrl) {
+  // ── Turso (libSQL) connection ─────────────────────────────────────────────
+  const tursoUrl = env.TURSO_DATABASE_URL?.trim();
+  if (!tursoUrl) {
     add({
       level: "error",
-      variable: "DATABASE_URL",
+      variable: "TURSO_DATABASE_URL",
       message: "Not set — no page or API that touches data can render.",
-      fix: "Add your hosted Postgres URL (Neon / Supabase / Railway). See docs/DEPLOYMENT.md.",
+      fix: "Set it to libsql://<database>-<org>.turso.io (Turso dashboard → the database). See docs/DEPLOYMENT.md.",
     });
-  } else {
-    const host = hostOf(databaseUrl);
-    if (!host || isLocalHost(host)) {
-      add({
-        level: "error",
-        variable: "DATABASE_URL",
-        message: `Points at a local address that a deployed function cannot reach.`,
-        fix: "Replace the project-local 127.0.0.1:5433 URL with a hosted, pooled Postgres URL.",
-      });
-    }
-    if (looksPooled(databaseUrl) && !env.DIRECT_URL?.trim()) {
-      add({
-        level: "warning",
-        variable: "DIRECT_URL",
-        message:
-          "DATABASE_URL looks pooled, but DIRECT_URL is not set. Migrations may fail over a transaction pooler.",
-        fix: "Set DIRECT_URL to the unpooled host (Neon: same URL without `-pooler`; Supabase: port 5432).",
-      });
-    }
+  } else if (tursoUrl.startsWith("file:")) {
+    add({
+      level: "error",
+      variable: "TURSO_DATABASE_URL",
+      message: "Points at a local file, which a deployed function cannot reach.",
+      fix: "Use the libsql:// URL of the Turso database. A file: URL is only for local, offline work.",
+    });
+  } else if (isLocalHost(hostOf(tursoUrl))) {
+    add({
+      level: "error",
+      variable: "TURSO_DATABASE_URL",
+      message: "Points at a local address that a deployed function cannot reach.",
+      fix: "Replace it with the libsql:// URL of the Turso database.",
+    });
+  }
+
+  // A remote Turso database rejects anonymous connections, so the token is as
+  // required as the URL. Rotate it if it has ever been shared or committed.
+  if (tursoUrl && !tursoUrl.startsWith("file:") && !env.TURSO_AUTH_TOKEN?.trim()) {
+    add({
+      level: "error",
+      variable: "TURSO_AUTH_TOKEN",
+      message: "Not set — a remote Turso database refuses anonymous connections, so every query fails.",
+      fix: "Create a token in the Turso dashboard and set it. Treat it as a password: it grants read-write access.",
+    });
+  }
+
+  // Left over from the PostgreSQL era. Harmless, but it means someone may still
+  // believe the app is reading from Postgres.
+  if (env.DATABASE_URL?.trim() && !env.SKIP_ENV_CHECK) {
+    add({
+      level: "warning",
+      variable: "DATABASE_URL",
+      message: "Is set, but the application now uses Turso — this value is ignored.",
+      fix: "Remove it from Netlify (and from .env) so the real database is not misread. Keep the old Postgres instance until you have confirmed the migration.",
+    });
   }
 
   // ── AUTH_SECRET ───────────────────────────────────────────────────────────

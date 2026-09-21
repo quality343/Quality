@@ -4,8 +4,8 @@ QUALITY Hearing Care deploys to Netlify from `github.com/quality343/Quality`
 (branch `main`). This document covers the one-time setup and the environment
 variables the app actually reads.
 
-The app is a server-rendered Next.js 15 application with Prisma on PostgreSQL,
-so it needs a **hosted Postgres database** and a **set of environment
+The app is a server-rendered Next.js 15 application with Prisma on **Turso**
+(libSQL/SQLite), so it needs a **Turso database** and a **set of environment
 variables**. Nothing runs without them.
 
 ---
@@ -21,14 +21,17 @@ verified against `src/lib/env.ts`, `src/lib/env-guard.ts` and
 
 | Variable | Scope | Example / how to get it | What breaks without it |
 |---|---|---|---|
-| `DATABASE_URL` | server | `postgresql://user:pass@ep-xxx-pooler...neon.tech/db?sslmode=require&pgbouncer=true&connection_limit=1` | Every page that reads data throws. Must be **pooled** — serverless functions open many short-lived connections. |
-| `DIRECT_URL` | server | Same as above but the **unpooled** host (Neon: drop `-pooler`; Supabase: port `5432`) | Migrations during build may fail through a transaction pooler. Strongly recommended. |
+| `TURSO_DATABASE_URL` | server | `libsql://<database>-<org>.aws-ap-south-1.turso.io` — `turso db show <name> --url` | Every page that reads data throws. Do **not** use a `file:` URL here in production. |
+| `TURSO_AUTH_TOKEN` | server | `turso db tokens create <name>` | A remote Turso database refuses anonymous connections, so every query fails. This token grants **read-write** access to all clinic data — treat it as a password. |
 | `AUTH_SECRET` | server | `openssl rand -base64 32` | Auth.js cannot sign sessions — `/login` is unusable. Use a **different value per environment**; never reuse the dev one. |
 | `AUTH_TRUST_HOST` | server | `true` | **The one that bites.** Auth.js v5 auto-trusts the host only on Vercel/Cloudflare. On Netlify's proxy, staff sign-in fails with `UntrustedHost`. |
 | `NEXT_PUBLIC_SITE_URL` | build + client | `https://qualityhearing.netlify.app` (or the custom domain) | Canonical tags, `sitemap.xml` and `robots.txt` emit `localhost:3000`. Inlined at **build time** — changing it needs a redeploy, not a restart. |
 
-`DATABASE_URL`, `DIRECT_URL` and `AUTH_SECRET` are secrets: put them in the
-Netlify UI only, never in `netlify.toml` (which is committed).
+`TURSO_DATABASE_URL`, `TURSO_AUTH_TOKEN` and `AUTH_SECRET` are secrets: put them
+in the Netlify UI only, never in `netlify.toml` (which is committed). Never give
+one a `NEXT_PUBLIC_` prefix — that would ship it to every browser. Any PostgreSQL
+`DATABASE_URL`/`DIRECT_URL` left over from before the migration are ignored by
+the application and can be deleted from Netlify.
 
 ### Optional
 
@@ -76,7 +79,8 @@ four steps in order:
 ```
 npm install                          → postinstall: prisma generate
 tsx scripts/check-env.ts             → validate environment (fails the deploy on error)
-tsx scripts/migrate-deploy.ts        → prisma migrate deploy over DIRECT_URL
+tsx scripts/db-prepare.ts            → apply the baseline schema on a first deploy,
+                                       then verify the schema AND the double-booking guard
 next build                           → compile and prerender
 ```
 
@@ -85,24 +89,33 @@ Two details worth knowing:
 - **`prisma generate` runs automatically** via the `postinstall` script. Without
   it, `next build` fails on a missing Prisma engine. This is the single most
   common Next.js + Prisma + Netlify failure.
-- **Migrations run at build time** through `DIRECT_URL`, not `DATABASE_URL`,
-  because Prisma's migration engine issues DDL that a transaction pooler cannot
-  carry. The URL is passed to the child process only — it never appears in the
-  build log.
+- **There is no `prisma migrate deploy` step any more.** Prisma Migrate does not
+  support Turso, so migrations are not applied by Prisma at all — the schema is
+  rendered to SQL and applied to Turso directly (see docs/DATABASE.md).
+  `db-prepare.ts` applies it once on an empty database and verifies it on every
+  later deploy, failing the build if the partial unique index that prevents
+double-booking has gone missing.
 
 ---
 
 ## 4. Schema changes after go-live
 
-Locally, create and test a migration as usual (`npm run db:migrate`), commit the
-generated folder under `prisma/migrations/`, and push. The next deploy applies
-it. Never edit a migration that has already been applied to production.
+Prisma Migrate does not support Turso, so this works differently from the
+PostgreSQL era — there is no `prisma migrate dev` / `migrate deploy` here:
 
-To apply migrations manually against production:
+1. Edit `prisma/schema.prisma`.
+2. Render the change to SQL and review it:
+   ```bash
+   npx prisma migrate diff --from-schema-datasource prisma/schema.prisma \
+     --to-schema-datamodel prisma/schema.prisma --script
+   ```
+3. Apply it to Turso (the Turso CLI, or `scripts/turso-apply-schema.ts` for the
+   baseline) and confirm with `npm run db:verify`.
 
-```bash
-DIRECT_URL="<production direct url>" npx prisma migrate deploy
-```
+Never drop `Appointment_active_slot_unique` — it is the only thing preventing two
+visitors from booking the same slot. `db-prepare.ts` fails the build if it is
+missing. `prisma/migrations-postgres-archive/` keeps the old PostgreSQL history
+for reference only; it is not applied to Turso.
 
 ---
 
@@ -156,10 +169,10 @@ After deploying, confirm:
 
 | Symptom | Cause | Fix |
 |---|---|---|
-| Build fails: `Environment variable not found: DATABASE_URL` | Variable not set, or set only for *Functions* scope while the build needs it | Set it for **all** scopes (Build + Functions + Runtime). |
+| Build fails: `TURSO_DATABASE_URL is not set` | Variable not set, or set only for *Functions* scope while the build needs it | Set it for **all** scopes (Build + Functions + Runtime). |
 | Build fails: `@prisma/client did not initialize yet` | `postinstall` was skipped (`--ignore-scripts`) | Confirm the install command does not pass `--ignore-scripts`; it must not in `netlify.toml`. |
-| Build fails on `prisma migrate deploy` | Migration ran over the pooler | Set `DIRECT_URL` to the unpooled host. |
-| Build passes, but every page returns 500 | `DATABASE_URL` points at the pooler without `pgbouncer=true&connection_limit=1`, or the database is unreachable | Check the function logs — `src/instrumentation.ts` prints a loud `[env]` block at boot. |
+| Build fails in `db-prepare.ts` | The database is missing tables, or the double-booking index was dropped | Re-apply `prisma/migrations/00000000000001_init_sqlite/migration.sql` (or `--force` if the schema genuinely needs rebuilding). |
+| Build passes, but every page returns 500 | `TURSO_DATABASE_URL`/`TURSO_AUTH_TOKEN` wrong, expired, or the token lacks read-write access | Check the function logs — `src/instrumentation.ts` prints a loud `[env]` block at boot. A revoked Turso token is the usual cause. |
 | Staff sign-in fails, page reloads | `AUTH_TRUST_HOST` not `"true"` | Set it in the Netlify UI and redeploy. |
 | `sitemap.xml` shows `localhost:3000` | `NEXT_PUBLIC_SITE_URL` missing or set after the build | Set it and **redeploy** (it is inlined at build time). |
 | Preview/branch builds fail with no database | Preview contexts have no DB | Set `SKIP_DB_MIGRATE=true` for those contexts. |

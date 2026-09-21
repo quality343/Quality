@@ -14,16 +14,14 @@
  * DEFERRED_PORTAL_AREAS).
  */
 
-export const ROLES = [
-  "PATIENT",
-  "AUDIOLOGIST",
-  "THERAPIST",
-  "CLINIC_STAFF",
-  "ADMIN",
-  "SUPER_ADMIN",
-] as const;
+// The role list itself lives in ./roles so the edge middleware can import it
+// without pulling in database code. Re-exported to keep existing imports working.
+import { ROLES, type UserRole } from "./roles";
 
-export type Role = (typeof ROLES)[number];
+export { ROLES };
+
+/** Alias kept for existing call sites — the vocabulary is `UserRole`. */
+export type Role = UserRole;
 
 export const PERMISSIONS = [
   // Patient self-service

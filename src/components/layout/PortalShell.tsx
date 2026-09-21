@@ -7,7 +7,7 @@ import { BrandLogo } from "@/components/brand/BrandLogo";
 import { Icon, type IconName } from "@/components/ui/Icon";
 import { ROLE_LABEL } from "@/lib/auth/role-labels";
 import { PortalSignOut } from "@/components/layout/PortalSignOut";
-import type { UserRole } from "@prisma/client";
+import type { UserRole } from "@/lib/rbac/roles";
 
 export type PortalNavItem = { href: string; label: string; icon: IconName };
 

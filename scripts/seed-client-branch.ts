@@ -6,10 +6,11 @@
  *
  * Run: npx tsx scripts/seed-client-branch.ts
  */
-import { PrismaClient } from "@prisma/client";
-import { CLIENT } from "../src/lib/client-info";
 
-const prisma = new PrismaClient();
+import { CLIENT } from "../src/lib/client-info";
+import { createPrismaClient } from "./db";
+
+const prisma = createPrismaClient();
 
 const REAL = {
   code: "KPHB-HQ",

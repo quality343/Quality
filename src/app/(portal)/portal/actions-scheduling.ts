@@ -154,7 +154,7 @@ export async function searchPatientsAction(
     }
     const patients = await prisma.patient.findMany({
       where: {
-        user: { name: { contains: query, mode: "insensitive" } },
+        user: { name: { contains: query } },
       },
       take: 8,
       select: { id: true, mrn: true, name: true, user: { select: { name: true } } },

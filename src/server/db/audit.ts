@@ -1,4 +1,3 @@
-import { Prisma } from "@prisma/client";
 import { prisma } from "./prisma";
 
 type AuditEvent = {
@@ -18,10 +17,10 @@ export async function recordAuditEvent(event: AuditEvent): Promise<void> {
       action: event.action,
       entityType: event.entityType,
       entityId: event.entityId,
-      metadata:
-        event.metadata === undefined
-          ? undefined
-          : (JSON.parse(JSON.stringify(event.metadata)) as Prisma.InputJsonValue),
+      // SQLite has no Json column type (Turso is libSQL), so this column is
+      // text and metadata is stored JSON-encoded. Callers keep passing plain
+      // objects — this is the single place that knows about the encoding.
+      metadata: event.metadata === undefined ? undefined : JSON.stringify(event.metadata),
       ip: event.ip,
       userAgent: event.userAgent,
     },

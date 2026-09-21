@@ -11,15 +11,20 @@
     "typecheck": "tsc --noEmit",
     "postinstall": "prisma generate",
     "db:generate": "prisma generate",
-    "db:migrate": "prisma migrate dev",
-    "db:deploy": "prisma migrate deploy",
+    "db:apply": "tsx scripts/turso-apply-schema.ts",
+    "db:prepare": "tsx scripts/db-prepare.ts",
+    "db:verify": "tsx scripts/turso-verify.ts",
     "db:studio": "prisma studio",
     "admin:provision": "tsx scripts/provision-admin.ts",
     "env:check": "tsx scripts/check-env.ts",
-    "build:netlify": "tsx scripts/check-env.ts && tsx scripts/migrate-deploy.ts && next build"
+    "test:booking": "tsx scripts/test-guest-booking.ts",
+    "test:concurrency": "tsx scripts/test-turso-concurrency.ts",
+    "build:netlify": "tsx scripts/check-env.ts && tsx scripts/db-prepare.ts && next build"
   },
   "dependencies": {
     "@auth/prisma-adapter": "^2.11.3",
+    "@libsql/client": "^0.15.15",
+    "@prisma/adapter-libsql": "^6.19.3",
     "@prisma/client": "^6.16.0",
     "bcryptjs": "^3.0.3",
     "next": "^15.5.0",

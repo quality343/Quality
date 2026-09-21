@@ -4,6 +4,7 @@
  */
 
 import { prisma } from "@/server/db/prisma";
+import { parseJsonSafe } from "@/lib/json";
 import { staffBranchId } from "./scheduling";
 import type { SessionUser } from "@/lib/auth/guards";
 
@@ -119,8 +120,11 @@ export async function searchAppointmentsForStaff(opts: AppointmentSearch) {
     const q = opts.q.trim();
     const refMatch = /^QHC-[0-9A-F]{8}$/i.test(q) ? q.toUpperCase() : null;
     where.OR = [
-      { patient: { name: { contains: q, mode: "insensitive" } } },
-      { patient: { user: { name: { contains: q, mode: "insensitive" } } } },
+      // `mode: "insensitive"` is a PostgreSQL-only Prisma option and is rejected
+      // on SQLite/Turso. It is not needed: SQLite's LIKE is case-insensitive for
+      // ASCII by default, so searching by name behaves the same.
+      { patient: { name: { contains: q } } },
+      { patient: { user: { name: { contains: q } } } },
       { patient: { phone: { contains: q } } },
       { patient: { user: { phone: { contains: q } } } },
       ...(refMatch ? [{ bookingRef: refMatch }] : []),
@@ -222,12 +226,19 @@ export async function listAssessmentsForStaff(user: SessionUser) {
 export async function listAssessmentsForPatientUser(userId: string) {
   const patient = await prisma.patient.findUnique({ where: { userId }, select: { id: true } });
   if (!patient) return [];
-  return prisma.hearingAssessment.findMany({
+  const assessments = await prisma.hearingAssessment.findMany({
     where: { patientId: patient.id },
     orderBy: { createdAt: "desc" },
     take: 50,
     include: { testResults: true },
   });
+
+  // Test payloads are JSON text on SQLite, so they are decoded here — once, at
+  // the data boundary — rather than in each page that charts them.
+  return assessments.map((a) => ({
+    ...a,
+    testResults: a.testResults.map((t) => ({ ...t, payload: parseJsonSafe(t.payload) })),
+  }));
 }
 
 export async function listReportsForPatientUser(userId: string) {

@@ -1,13 +1,18 @@
 # Netlify configuration for QUALITY Hearing Care.
 #
 # Build pipeline (see docs/DEPLOYMENT.md for the full walkthrough):
-#   1. npm install         → runs `postinstall: prisma generate` (Prisma client)
-#   2. tsx scripts/check-env.ts     → refuses to publish a misconfigured deploy
-#   3. tsx scripts/migrate-deploy.ts   → applies migrations over DIRECT_URL
+#   1. npm install        → runs `postinstall: prisma generate` (Prisma client)
+#   2. tsx scripts/check-env.ts    → refuses to publish a misconfigured deploy
+#   3. tsx scripts/db-prepare.ts   → applies the baseline schema on first deploy,
+#      then verifies the schema AND the double-booking guard on every later one
 #   4. next build
 #
-# Values that are SECRETS (DATABASE_URL, DIRECT_URL, AUTH_SECRET) must be set in
-# the Netlify UI, never here — this file is committed to the repository.
+# The database is Turso (libSQL). Prisma Migrate does not support Turso, so
+# there is no `prisma migrate deploy` step — see docs/DATABASE.md.
+#
+# Values that are SECRETS (TURSO_DATABASE_URL, TURSO_AUTH_TOKEN, AUTH_SECRET)
+# must be set in the Netlify UI, never here — this file is committed to the
+# repository.
 
 [build]
   command = "npm run build:netlify"

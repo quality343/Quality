@@ -4,10 +4,10 @@
  * Creates and cleans up its own fixtures (tagged), no real data touched.
  */
 
-import { PrismaClient } from "@prisma/client";
 import { randomBytes } from "crypto";
+import { createPrismaClient } from "./db";
 
-const prisma = new PrismaClient();
+const prisma = createPrismaClient();
 
 let pass = 0;
 let fail = 0;
@@ -24,7 +24,7 @@ function check(name: string, cond: boolean, detail?: string) {
 const TAG = `g${Date.now().toString(36)}`;
 const cleanup: { kind: "branch" | "service"; id: string }[] = [];
 
-// Imported service functions under test (run against the same DATABASE_URL).
+// Imported service functions under test (run against the same database).
 import {
   bookGuestAppointment,
   getGuestBookingByRefAndToken,

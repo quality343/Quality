@@ -30,7 +30,7 @@ import {
  */
 import { getToken } from "next-auth/jwt";
 import type { NextRequest } from "next/server";
-import type { UserRole } from "@prisma/client";
+import type { UserRole } from "@/lib/rbac/roles";
 
 const SECURITY_HEADERS: Record<string, string> = {
   "X-Frame-Options": "DENY",

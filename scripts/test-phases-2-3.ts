@@ -4,10 +4,10 @@
  * Creates and cleans up its own fixtures (tagged emails), no real data touched.
  */
 
-import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { createPrismaClient } from "./db";
 
-const prisma = new PrismaClient();
+const prisma = createPrismaClient();
 
 let pass = 0;
 let fail = 0;

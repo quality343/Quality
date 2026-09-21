@@ -1,4 +1,4 @@
-import type { UserRole } from "@prisma/client";
+import type { UserRole } from "@/lib/rbac/roles";
 import { redirect } from "next/navigation";
 import { auth } from "@/server/auth/config";
 import {

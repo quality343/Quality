@@ -3,7 +3,7 @@ import Credentials from "next-auth/providers/credentials";
 import { PrismaAdapter } from "@auth/prisma-adapter";
 import type { Provider } from "next-auth/providers";
 import bcrypt from "bcryptjs";
-import type { UserRole } from "@prisma/client";
+import type { UserRole } from "@/lib/rbac/roles";
 import { prisma } from "@/server/db/prisma";
 import { loginSchema, isEmailIdentifier } from "@/lib/validation/auth";
 import { recordAuditEventSafe } from "@/lib/audit";

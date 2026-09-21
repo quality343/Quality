@@ -6,10 +6,10 @@
  * Run: npx tsx scripts/seed-org.ts
  */
 
-import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { createPrismaClient } from "./db";
 
-const prisma = new PrismaClient();
+const prisma = createPrismaClient();
 
 const BRANCHES = [
   { code: "VSP-MAIN", name: "Visakhapatnam Main", city: "Visakhapatnam", address: "Main clinic address", phone: "" },

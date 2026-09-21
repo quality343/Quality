@@ -21,16 +21,17 @@
  * To run against production, point DATABASE_URL/DIRECT_URL at the production
  * database for this command only. Delete the ADMIN_* values afterwards.
  */
-import { PrismaClient } from "@prisma/client";
+
 import bcrypt from "bcryptjs";
 import { loadLocalEnv } from "./load-local-env";
+import { createPrismaClient } from "./db";
 
 // Loads .env for local runs. An explicitly-exported DATABASE_URL/DIRECT_URL
 // always wins, so pointing this command at production cannot be overridden by
 // a local .env (see scripts/load-local-env.ts).
 loadLocalEnv();
 
-const prisma = new PrismaClient();
+const prisma = createPrismaClient();
 
 const MIN_PASSWORD_LENGTH = 12;
 
@@ -147,7 +148,7 @@ async function main() {
       entityId: provisioned?.id,
       // No password material and no personal data beyond what the operator
       // already supplied — keeps the audit trail useful without leaking.
-      metadata: { rotated: Boolean(existing), script: "provision-admin.ts" },
+      metadata: JSON.stringify({ rotated: Boolean(existing), script: "provision-admin.ts" }),
     },
   });
 

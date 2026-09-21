@@ -1,3 +1,4 @@
+import { createPrismaClient } from "./db";
 /**
  * Demo hearing-aid catalogue seed — SYNTHETIC SAMPLE DATA.
  *
@@ -8,9 +9,7 @@
  * Run: npx tsx scripts/seed-hearingaids.ts
  */
 
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+const prisma = createPrismaClient();
 
 const FEATURES = [
   { key: "rechargeable", label: "Rechargeable", category: "power" },

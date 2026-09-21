@@ -1,4 +1,4 @@
-import type { UserRole } from "@prisma/client";
+import type { UserRole } from "@/lib/rbac/roles";
 import { CLINIC_OPS_ROLES, DEFERRED_PORTAL_AREAS } from "@/lib/rbac/permissions";
 
 /**

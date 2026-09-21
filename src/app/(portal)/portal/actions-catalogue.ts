@@ -103,10 +103,20 @@ export async function modelUpsertAction(raw: unknown): Promise<ActionResult<{ id
           where: { key: { in: input.featureKeys } },
           select: { id: true },
         });
-        await tx.hearingAidModelFeature.createMany({
-          data: features.map((f) => ({ modelId: m.id, featureId: f.id })),
-          skipDuplicates: true,
+        // SQLite (Turso) does not support `skipDuplicates` on createMany, so
+        // features already linked to this model are filtered out first. The
+        // result is the same idempotent outcome, just made explicit.
+        const alreadyLinked = await tx.hearingAidModelFeature.findMany({
+          where: { modelId: m.id },
+          select: { featureId: true },
         });
+        const linkedIds = new Set(alreadyLinked.map((l) => l.featureId));
+        const toLink = [...new Set(features.map((f) => f.id))].filter((id) => !linkedIds.has(id));
+        if (toLink.length > 0) {
+          await tx.hearingAidModelFeature.createMany({
+            data: toLink.map((featureId) => ({ modelId: m.id, featureId })),
+          });
+        }
       }
       return m;
     });
@@ -240,11 +250,13 @@ export async function accessoryUpsertAction(
         : await tx.hearingAidAccessory.create({ data });
 
       await tx.hearingAidAccessoryCompatibility.deleteMany({ where: { accessoryId: a.id } });
-      const ids = raw.compatibleModelIds ?? [];
+      // Deduplicated because SQLite does not support `skipDuplicates`. The rows
+      // for this accessory were deleted just above, so only repeats inside the
+      // submitted list could collide.
+      const ids = [...new Set(raw.compatibleModelIds ?? [])];
       if (ids.length > 0) {
         await tx.hearingAidAccessoryCompatibility.createMany({
           data: ids.map((modelId) => ({ accessoryId: a.id, modelId })),
-          skipDuplicates: true,
         });
       }
       return a;

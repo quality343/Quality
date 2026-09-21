@@ -1,8 +1,64 @@
 # Database Domain Plan — QUALITY Hearing Care
 
-Status: **proposal** (explanatory). Only the identity foundation (`users`, `patients`, `staff`,
-`branches`, `audit_logs`) is implemented in the starter Prisma schema; everything else is
-phased work. This document defines relationships before implementation.
+## 0. Platform — Turso (libSQL), and what changed
+
+The production database is **Turso** (libSQL), reached through Prisma's `@prisma/adapter-libsql`
+driver adapter. The connection URL lives in the `TURSO_DATABASE_URL` environment variable and is
+deliberately **not** written down here — this repository is public, and the database host is not
+something a stranger needs. The project ran on
+PostgreSQL before this migration; the old PostgreSQL migration history is preserved in
+`prisma/migrations-postgres-archive/` and is no longer applied anywhere.
+
+Turso is SQLite-compatible, and Prisma's SQLite connector supports a **narrower language** than
+its PostgreSQL one. Three things had to change, and they are the whole cost of the migration:
+
+| PostgreSQL feature | Turso/SQLite | Consequence |
+|---|---|---|
+| 29 `enum` blocks | plain `TEXT` | The database no longer rejects an unknown value. The vocabulary lives in `src/lib/rbac/roles.ts` (roles) and `CLINICAL_TEST_TYPES` (test kinds). Authorization fails **closed**: `roleHasPermission()` denies anything it does not recognise. |
+| 4 `Json` columns (`TestResult.payload`, `Audiogram.data`, `Report.content`, `AuditLog.metadata`) | `TEXT`, JSON-encoded | Read with `parseJsonSafe()` (`src/lib/json.ts`), write with `JSON.stringify()`. Decoding happens at the data boundary, not in components. |
+| `@db.VarChar(n)` native types | removed | Length limits are no longer enforced by the database. They are enforced by the `zod` schemas in `src/lib/validation/`, which is where user input is checked anyway. |
+
+Two SQL features were also unavailable and were worked around rather than dropped:
+
+- **`skipDuplicates` on `createMany`** is unsupported on SQLite. The catalogue actions now filter
+already-linked rows explicitly, so the outcome stays idempotent.
+- **`mode: "insensitive"`** is PostgreSQL-only. It was removed from the admin searches — SQLite's
+`LIKE` is already case-insensitive for ASCII, so search behaviour is unchanged.
+
+### The one guarantee that had to survive
+
+Preventing two visitors from booking the same slot does **not** rely on database locking, so it
+transfers intact. It is a **partial unique index**:
+
+```sql
+CREATE UNIQUE INDEX "Appointment_active_slot_unique"
+  ON "Appointment"("slotId")
+  WHERE "slotId" IS NOT NULL
+    AND "status" IN ('BOOKED', 'CHECKED_IN', 'IN_PROGRESS');
+```
+
+SQLite supports partial indexes, so this is identical to the PostgreSQL original. The booking
+service maps the resulting violation to the visitor-facing "This time slot is no longer
+available." It is partial on purpose: cancelled and completed appointments keep their `slotId` for
+history, so a released slot becomes bookable again without deleting the row.
+
+Prisma's schema language cannot express a partial index, so it lives in raw SQL
+(`prisma/migrations/00000000000001_init_sqlite/migration.sql`). Verified by
+`scripts/test-turso-concurrency.ts` (a 2-way and an 8-way race, plus the sequential case) and
+re-checked on every deploy by `scripts/db-prepare.ts`, which fails the build if it is missing.
+
+### Migrations
+
+Prisma Migrate does not support Turso. The baseline is rendered with
+`prisma migrate diff --from-empty --to-schema-datamodel` and applied by
+`scripts/turso-apply-schema.ts`. See docs/DEPLOYMENT.md §4 for the change workflow.
+
+---
+
+Status: **proposal** (explanatory) for the domain model below. The tables actually implemented in
+`prisma/schema.prisma` are described in §2; relate the sections below to planned work.
+
+<!-- Original framing retained: this document defined relationships before implementation. -->
 
 ## 1. Entity map
 

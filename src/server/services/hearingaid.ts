@@ -106,9 +106,9 @@ export async function listCatalogue(user: SessionUser, filters: CatalogueFilters
       ...(filters.q
         ? {
             OR: [
-              { modelName: { contains: filters.q, mode: "insensitive" as const } },
-              { modelCode: { contains: filters.q, mode: "insensitive" as const } },
-              { brand: { name: { contains: filters.q, mode: "insensitive" as const } } },
+              { modelName: { contains: filters.q } },
+              { modelCode: { contains: filters.q } },
+              { brand: { name: { contains: filters.q } } },
             ],
           }
         : {}),

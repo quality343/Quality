@@ -18,6 +18,8 @@ const ICONS = {
   home: "M3 11l9-8 9 8m-2 1v8a1 1 0 0 1-1 1h-4v-6h-4v6H6a1 1 0 0 1-1-1v-8",
   clipboard:
     "M9 4h6a1 1 0 0 1 1 1v2H8V5a1 1 0 0 1 1-1ZM6 6h2m8 0h2a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1Zm3 7h6m-6 4h4",
+  video:
+    "M4 6h16a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1Zm5 2.5 5 3.5-5 3.5v-7Z",
 } as const;
 
 export type IconName = keyof typeof ICONS;

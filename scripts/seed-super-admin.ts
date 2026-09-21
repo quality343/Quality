@@ -18,10 +18,11 @@
  * SECURITY: run once during setup, then REMOVE the env values. Never commit
  * them. There is deliberately no public registration path for staff roles.
  */
-import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcryptjs";
 
-const prisma = new PrismaClient();
+import bcrypt from "bcryptjs";
+import { createPrismaClient } from "./db";
+
+const prisma = createPrismaClient();
 
 async function main() {
   const name = process.env.SUPER_ADMIN_NAME;
@@ -80,7 +81,7 @@ async function main() {
       action: "bootstrap.super_admin",
       entityType: "User",
       entityId: admin?.id,
-      metadata: { promoted: Boolean(existing), script: "seed-super-admin.ts" },
+      metadata: JSON.stringify({ promoted: Boolean(existing), script: "seed-super-admin.ts" }),
     },
   });
 

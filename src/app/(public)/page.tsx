@@ -5,6 +5,7 @@ import { HearingAidDevice } from "@/components/brand/HearingAidDevice";
 import { AudiogramExplainer } from "@/components/brand/SoundWave";
 import { Reveal } from "@/components/motion/Reveal";
 import { Photo } from "@/components/media/Photo";
+import { VideoShowcase } from "@/components/media/VideoShowcase";
 import { HearingSelfCheck } from "@/components/hearing/HearingSelfCheck";
 import { CLIENT } from "@/lib/client-info";
 import { PHOTOS } from "@/lib/images";
@@ -426,6 +427,12 @@ export default async function HomePage() {
           </div>
         </Container>
       </section>
+
+      {/* ══ CLINIC VIDEO ═════════════════════════════════════════════
+          Placed after the services section and before the product
+          showcase. Renders nothing in production until the clinic
+          supplies a clip — see src/lib/media.ts. */}
+      <VideoShowcase />
 
       {/* ══ 5. HEARING-AID SHOWCASE ══════════════════════════════════ */}
       <section className="relative overflow-hidden bg-brand-950 text-white">

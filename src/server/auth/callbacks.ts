@@ -1,4 +1,4 @@
-import type { UserRole } from "@prisma/client";
+import type { UserRole } from "@/lib/rbac/roles";
 
 /**
  * JWT/session callbacks — dependency-free so both the Node runtime auth config

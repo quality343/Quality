@@ -3,10 +3,10 @@
  * Run: npx tsx scripts/test-phase4.ts
  */
 
-import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { createPrismaClient } from "./db";
 
-const prisma = new PrismaClient();
+const prisma = createPrismaClient();
 const TAG = `p4-${Date.now().toString(36)}`;
 let seq = 0;
 const cleanup: string[] = []; // user ids

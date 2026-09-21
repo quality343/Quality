@@ -34,8 +34,15 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# local development database (project-local PostgreSQL data directory)
+# local development database (project-local PostgreSQL data directory, no longer
+# used by the app but the instance is kept until the Turso migration is signed off)
 /.localdb/
+
+# local SQLite/libSQL file database (TURSO_DATABASE_URL="file:./dev.db")
+prisma/dev.db*
+*.db-journal
+*.db-wal
+*.db-shm
 
 # local tooling state and temp scratch files (preview logs, cookie jars, one-off scripts)
 /.freebuff/

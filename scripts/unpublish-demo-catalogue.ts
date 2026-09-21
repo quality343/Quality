@@ -1,3 +1,4 @@
+import { createPrismaClient } from "./db";
 /**
  * Unpublish seeded demo hearing-aid rows.
  *
@@ -16,15 +17,13 @@
  * Run:  npx tsx scripts/unpublish-demo-catalogue.ts
  */
 
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+const prisma = createPrismaClient();
 
 async function main() {
   // Match the seeded demo brands by their explicit "(demo)" marker rather than
   // by guessing model names, so any real products are left untouched.
   const demoBrands = await prisma.hearingAidBrand.findMany({
-    where: { name: { contains: "(demo)", mode: "insensitive" } },
+    where: { name: { contains: "(demo)" } },
     select: { id: true, name: true },
   });
 

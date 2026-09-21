@@ -5,8 +5,8 @@
  * captured in review text, signed notes, and reports.
  */
 
-import { TestType } from "@prisma/client";
 import { prisma } from "@/server/db/prisma";
+import { parseJsonSafe } from "@/lib/json";
 import { canAccess, type SessionUser } from "@/lib/auth/guards";
 import {
   ForbiddenError,
@@ -82,7 +82,13 @@ export async function getAssessmentForUser(user: SessionUser, assessmentId: stri
     },
   });
   if (!assessment) throw new NotFoundError("Assessment not found.");
-  return assessment;
+
+  // Test payloads are JSON text on SQLite; decode once here so callers (charts,
+  // the raw-payload preview) receive objects rather than encoded strings.
+  return {
+    ...assessment,
+    testResults: assessment.testResults.map((t) => ({ ...t, payload: parseJsonSafe(t.payload) })),
+  };
 }
 
 /** Patients may only ever see their own assessment. */
@@ -176,7 +182,24 @@ export async function reviewAssessment(user: SessionUser, raw: unknown) {
 
 // ─── Test results ────────────────────────────────────────────────────────────
 
-export const CLINICAL_TEST_TYPES = Object.values(TestType);
+/**
+ * The test types this clinic records.
+ *
+ * This used to be `Object.values(TestType)`, read from the Prisma enum. SQLite
+ * (and therefore Turso) cannot express enums and the column is now text, so the
+ * list is written out explicitly. It is used for populating pickers, not for
+ * validating writes — keep it in sync with docs/DATABASE.md.
+ */
+export const CLINICAL_TEST_TYPES = [
+  "PTA",
+  "SPEECH",
+  "TYMPANOMETRY",
+  "ABR",
+  "OAE",
+  "VESTIBULAR",
+  "TINNITUS",
+  "SPECIALIZED",
+] as const;
 
 /** Records a test result on a DRAFT assessment. PTA also creates the audiogram. */
 export async function recordTestResult(user: SessionUser, raw: unknown) {
@@ -194,14 +217,14 @@ export async function recordTestResult(user: SessionUser, raw: unknown) {
       data: {
         assessmentId: assessment.id,
         testType: input.testType,
-        payload: input.payload as object,
+        payload: JSON.stringify(input.payload),
         performedById: (await tx.staff.findUnique({ where: { userId: user.id } }))?.id ?? null,
       },
     });
 
     if (input.testType === "PTA") {
       await tx.audiogram.create({
-        data: { testResultId: result.id, data: input.payload as object },
+        data: { testResultId: result.id, data: JSON.stringify(input.payload) },
       });
     }
     return result;
@@ -260,7 +283,7 @@ export async function generateReport(user: SessionUser, raw: unknown) {
       history: assessment.history,
       referredBy: assessment.referredBy,
     },
-    tests: assessment.testResults.map((t) => ({ testType: t.testType, payload: t.payload })),
+    tests: assessment.testResults.map((t) => ({ testType: t.testType, payload: parseJsonSafe(t.payload) })),
     review: {
       text: assessment.reviewText,
       reviewer: assessment.reviewer?.user.name ?? null,
@@ -274,7 +297,7 @@ export async function generateReport(user: SessionUser, raw: unknown) {
       assessmentId: assessment.id,
       generatedById: staff.id,
       title: input.title,
-      content: content as object,
+      content: JSON.stringify(content),
       status: input.finalize ? "FINAL" : "DRAFT",
       finalizedById: input.finalize ? staff.id : null,
       finalizedAt: input.finalize ? new Date() : null,

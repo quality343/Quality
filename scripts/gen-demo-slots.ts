@@ -1,10 +1,11 @@
+import { createPrismaClient } from "./db";
 /**
  * Dev convenience: generate OPEN slots for the next 5 business days at every
  * active branch (9:30–13:00 & 14:00–17:30 IST, 30-min). Safe to re-run —
  * idempotent per (branch, startsAt). Dev data only.
  */
-import { PrismaClient } from "@prisma/client";
-const prisma = new PrismaClient();
+
+const prisma = createPrismaClient();
 
 async function main() {
   const branches = await prisma.branch.findMany({ where: { isActive: true } });
