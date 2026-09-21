@@ -1,0 +1,23 @@
+# Local development database — QUALITY Hearing Care
+# Usage: docker compose up -d
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: qhc-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: qhc
+      POSTGRES_PASSWORD: qhc
+      POSTGRES_DB: quality_hearing_care
+    ports:
+      - "5432:5432"
+    volumes:
+      - qhc_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U qhc -d quality_hearing_care"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  qhc_pgdata:

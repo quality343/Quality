@@ -1,0 +1,337 @@
+@import "tailwindcss";
+
+/*
+ * QUALITY Hearing Care — design tokens (single source of brand truth)
+ *
+ * Palette extracted from the OFFICIAL logo (public/brand/logo.png):
+ *   brand blue base  #004898 (the logo's primary blue)
+ *   brand blue deep  #003078 (dark blue in the wordmark)
+ *   accent red       #d01028 (the logo's red)
+ * Ink stays a neutral blue-slate for readable body text.
+ *
+ * Components never hardcode colors — always consume these tokens.
+ */
+@theme {
+  /* Brand blue scale anchored to the logo (base = 700, deep = 800/900) */
+  --color-brand-50: #ecf3fb;
+  --color-brand-100: #d8e6f6;
+  --color-brand-200: #b3cdec;
+  --color-brand-300: #84aede;
+  --color-brand-400: #4d8bcb;
+  --color-brand-500: #2069b4;
+  --color-brand-600: #00519f;
+  --color-brand-700: #004898;
+  --color-brand-800: #003078;
+  --color-brand-900: #00275e;
+  --color-brand-950: #001a40;
+
+  /* Accent red scale anchored to the logo */
+  --color-accent-50: #fdeef0;
+  --color-accent-100: #fbdcdc;
+  --color-accent-200: #f6b8bb;
+  --color-accent-300: #ef8b93;
+  --color-accent-400: #e65466;
+  --color-accent-500: #dc2638;
+  --color-accent-600: #d01028;
+  --color-accent-700: #a90c20;
+  --color-accent-800: #83091a;
+
+  /* Neutral ink scale (readable blue-slate) */
+  --color-ink-400: #7d8ca0;
+  --color-ink-500: #5b6b80;
+  --color-ink-600: #3f5068;
+  --color-ink-700: #2a3c55;
+  --color-ink-800: #1a2c47;
+  --color-ink-900: #10233f;
+
+  --color-surface: #ffffff;
+  --color-surface-muted: #f6f8fb;
+  --color-border: #e3e9f1;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
+    "Segoe UI", sans-serif;
+  /* Display face for headings — tighter, more premium than body copy. */
+  --font-display: var(--font-jakarta), var(--font-inter), ui-sans-serif,
+    system-ui, sans-serif;
+
+  /* Extra depth tokens used by the premium surfaces. */
+  --shadow-glow: 0 0 0 1px rgb(255 255 255 / 0.06), 0 30px 60px -24px rgb(0 39 94 / 0.45);
+  --shadow-product: 0 18px 40px -18px rgb(0 26 64 / 0.55), 0 60px 110px -50px rgb(0 26 64 / 0.65);
+
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
+
+  --shadow-card: 0 1px 2px rgb(16 35 63 / 0.05), 0 8px 24px -12px rgb(16 35 63 / 0.12);
+  --shadow-lift: 0 2px 4px rgb(16 35 63 / 0.06), 0 16px 32px -12px rgb(16 35 63 / 0.18);
+  --shadow-float: 0 4px 8px rgb(0 26 64 / 0.08), 0 24px 48px -16px rgb(0 26 64 / 0.28);
+
+  --animate-fade-up: fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-float-slow: float 11s ease-in-out infinite;
+  --animate-turn-slow: turn 34s linear infinite;
+  --animate-turn-reverse: turn-reverse 48s linear infinite;
+  --animate-pulse-ring: pulse-ring 5s ease-out infinite;
+  --animate-sheen: sheen 7s ease-in-out infinite;
+  --animate-dash: dash 5s ease-in-out infinite;
+  --animate-bar: bar 2.6s ease-in-out infinite;
+}
+
+/* ── Keyframes ───────────────────────────────────────────────
+ * Declared at the top level, not inside @theme. Tailwind only emits
+ * @theme keyframes when the matching `animate-*` utility is used, but the
+ * product artwork drives several of these from inline styles (so the
+ * animation can be toggled per instance), which would leave those rules
+ * pointing at keyframes that were stripped out.
+ */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Gentle vertical hover used by the product renders. */
+@keyframes float {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -14px, 0);
+  }
+}
+
+@keyframes turn {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes turn-reverse {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+/* Expanding listening ring — decorative only, never carries information. */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.72);
+    opacity: 0.5;
+  }
+  70% {
+    opacity: 0;
+  }
+  100% {
+    transform: scale(1.25);
+    opacity: 0;
+  }
+}
+
+/* Slow specular sweep across a product surface. */
+@keyframes sheen {
+  0%,
+  100% {
+    opacity: 0.28;
+    transform: translateX(-6%) rotate(6deg);
+  }
+  50% {
+    opacity: 0.6;
+    transform: translateX(6%) rotate(6deg);
+  }
+}
+
+@keyframes dash {
+  0%,
+  100% {
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dashoffset: -60;
+  }
+}
+
+/* Audiogram-explainer bars — decorative/educational, not a diagnosis. */
+@keyframes bar {
+  0%,
+  100% {
+    transform: scaleY(0.55);
+  }
+  50% {
+    transform: scaleY(1);
+  }
+}
+
+/* ── Premium surface treatments ─────────────────────────────
+ * Reusable, token-driven utilities. Components compose these
+ * instead of hardcoding gradients/shadows inline.            */
+
+/* Deep brand gradient for hero / CTA bands. */
+.bg-brand-gradient {
+  background-image:
+    radial-gradient(52rem 30rem at 85% -10%, rgb(32 105 180 / 0.35), transparent 60%),
+    radial-gradient(40rem 26rem at -10% 110%, rgb(220 38 56 / 0.14), transparent 55%),
+    linear-gradient(135deg, var(--color-brand-900) 0%, var(--color-brand-800) 55%, var(--color-brand-700) 100%);
+}
+
+/* Soft tinted band for alternating sections. */
+.bg-tint-gradient {
+  background-image: linear-gradient(180deg, var(--color-surface) 0%, var(--color-brand-50) 100%);
+}
+
+/* Hover lift for interactive cards. */
+.card-lift {
+  transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.25s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.card-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lift);
+}
+
+/* Fine dot texture for dark bands (subtle, low-contrast). */
+.dot-grid {
+  background-image: radial-gradient(rgb(255 255 255 / 0.09) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
+
+/* Faint grid for light premium panels. */
+.grid-faint {
+  background-image:
+    linear-gradient(to right, rgb(0 72 152 / 0.045) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(0 72 152 / 0.045) 1px, transparent 1px);
+  background-size: 56px 56px;
+}
+
+/* ── Hero atmosphere ────────────────────────────────────────
+ * Deep, calm healthcare backdrop. Deliberately no neon, no
+ * heavy glassmorphism — just layered light.               */
+.bg-hero {
+  background-color: var(--color-brand-950);
+  background-image:
+    radial-gradient(38rem 26rem at 78% 12%, rgb(32 105 180 / 0.5), transparent 62%),
+    radial-gradient(30rem 24rem at 10% 0%, rgb(0 72 152 / 0.45), transparent 60%),
+    radial-gradient(34rem 22rem at 50% 118%, rgb(220 38 56 / 0.18), transparent 60%),
+    linear-gradient(168deg, var(--color-brand-900) 0%, var(--color-brand-950) 62%, #001130 100%);
+}
+
+/* Soft light halo behind a featured product. */
+.bg-halo {
+  background-image: radial-gradient(closest-side, rgb(255 255 255 / 0.9), rgb(214 231 248 / 0.5) 55%, transparent 100%);
+}
+
+/* ── Typography helpers ─────────────────────────────────────
+ * Display headings share one rhythm so hierarchy stays
+ * consistent across every section.                        */
+.headline {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.028em;
+  line-height: 1.06;
+}
+.eyebrow {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+.text-gradient-light {
+  background-image: linear-gradient(96deg, #ffffff 0%, var(--color-brand-200) 62%, var(--color-brand-300) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.text-gradient-brand {
+  background-image: linear-gradient(96deg, var(--color-brand-800) 0%, var(--color-brand-600) 55%, var(--color-brand-500) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ── Scroll reveal ──────────────────────────────────────────
+ * Elements start settled so content is readable without JS;
+ * the noscript override in layout.tsx guarantees the same
+ * when scripts are unavailable.                            */
+.reveal-init {
+  opacity: 0;
+  transform: translateY(22px);
+}
+.reveal-in {
+  opacity: 1;
+  transform: translateY(0);
+  transition:
+    opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ── Micro-interactions ─────────────────────────────────────
+ * Buttons communicate interactivity without gimmicks.      */
+.btn-lift {
+  transition:
+    transform 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+    background-color 0.18s ease;
+}
+.btn-lift:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-lift);
+}
+.btn-lift:active {
+  transform: translateY(0);
+}
+
+/* Product imagery scales subtly on hover instead of moving layout. */
+.product-zoom img,
+.product-zoom svg {
+  transition: transform 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.product-zoom:hover img,
+.product-zoom:hover svg {
+  transform: scale(1.045) translateY(-4px);
+}
+
+/* Base element styles */
+html {
+  scroll-behavior: smooth;
+}
+body {
+  background-color: var(--color-surface-muted);
+  color: var(--color-ink-900);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+:focus-visible {
+  outline: 2px solid var(--color-brand-600);
+  outline-offset: 2px;
+}
+::selection {
+  background-color: var(--color-brand-100);
+}
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+  /* Reveal must not hide content when motion is unwelcome. */
+  .reveal-init {
+    opacity: 1;
+    transform: none;
+  }
+}

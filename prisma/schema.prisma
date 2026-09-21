@@ -1,0 +1,999 @@
+// QUALITY Hearing Care — schema
+// Phase 1: identity & RBAC (users/patients/staff/branches/audit_logs)
+// Phase 2: organization & scheduling (services, slots, appointments, notifications)
+// Phase 3: clinical core (assessments, tests, audiograms, notes, reports)
+// Hearing-aid lifecycle, therapy, and CMS remain future work (docs/DATABASE.md).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Identity ────────────────────────────────────────────────────────────────
+
+/// Platform-wide roles, stored on the user row (database-backed enum).
+/// Upgrade path to roles/user_roles join tables is documented in docs/RBAC.md;
+/// authorization call sites use requireRole()/requirePermission() and will not
+/// change when that happens.
+enum UserRole {
+  PATIENT
+  AUDIOLOGIST
+  THERAPIST
+  CLINIC_STAFF
+  ADMIN
+  SUPER_ADMIN
+}
+
+/// One login identity per person. Minimum data needed for auth + UI.
+/// passwordHash is bcrypt; NEVER selected into client-visible payloads.
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String?
+  name         String
+  phone        String?   @unique @db.VarChar(20)
+  role         UserRole  @default(PATIENT)
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  patient       Patient?
+  staff         Staff?
+  auditLogs     AuditLog[]     @relation("AuditActor")
+  notifications Notification[]
+  bookedBy      Appointment[]  @relation("AppointmentBooker")
+}/// People receiving care. Registered patients are 1:1 with User (created at
+/// registration). Guest visitors book appointments without an account: they get
+/// a patient row with userId null and contact fields captured at booking time.
+/// Repeated guest bookings by the same phone reuse one guest patient row.
+model Patient {
+  id        String    @id @default(cuid())
+  userId    String?   @unique
+  mrn       String    @unique @default(cuid())
+  name      String?
+  phone     String?   @db.VarChar(20)
+  email     String?
+  isGuest   Boolean   @default(false)
+  dateOfBirth DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime @updatedAt
+
+  user          User?               @relation(fields: [userId], references: [id])
+
+  @@index([isGuest, phone])
+  branch        Branch?             @relation(fields: [branchId], references: [id])
+  branchId      String?
+  appointments  Appointment[]
+  assessments   HearingAssessment[]
+  notes         ClinicalNote[]
+  reports       Report[]
+  followUps     FollowUp[]
+  aidRecommendations HearingAidRecommendation[]
+  aidDemos      HearingAidDemo[]
+  aidFittings   HearingAidFitting[]
+  aidDispensings HearingAidDispensing[]
+  aidWarranties HearingAidWarranty[]
+  aidServiceRecords HearingAidServiceRecord[]
+  aidFollowUps  HearingAidFollowUp[]
+
+  @@index([branchId])
+}
+
+/// Staff identity for AUDIOLOGIST / THERAPIST / CLINIC_STAFF / ADMIN /
+/// SUPER_ADMIN users. Provisioned internally (admin portal / seed) — never
+/// via public registration.
+model Staff {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  branchId    String?
+  designation String?  @db.VarChar(100)
+  licenseNo   String?  @db.VarChar(50)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user              User                @relation(fields: [userId], references: [id])
+  branch            Branch?             @relation(fields: [branchId], references: [id])
+  slots             AppointmentSlot[]
+  appointments      Appointment[]       @relation("AppointmentProvider")
+  assessments       HearingAssessment[] @relation("AssessmentAudiologist")
+  reviewedReviews   HearingAssessment[] @relation("AssessmentReviewer")
+  authoredNotes     ClinicalNote[]
+  performedTests    TestResult[]
+  generatedReports  Report[]            @relation("ReportGenerator")
+  finalizedReports  Report[]            @relation("ReportFinalizer")
+  aidRecommendations HearingAidRecommendation[] @relation("RecommendationAudiologist")
+  aidDemos          HearingAidDemo[]           @relation("DemoStaff")
+  aidFittings       HearingAidFitting[]        @relation("FittingAudiologist")
+  aidDispensings    HearingAidDispensing[]     @relation("DispensingStaff")
+  aidServiceRecords HearingAidServiceRecord[]  @relation("ServiceAssignee")
+  aidAftercare      HearingAidFollowUp[]       @relation("AftercareAudiologist")
+
+  @@index([branchId])
+}
+
+/// Physical clinic location. Branch management (admin portal, Phase 2).
+model Branch {
+  id        String   @id @default(cuid())
+  code      String   @unique @db.VarChar(20)
+  name      String
+  city      String?  @db.VarChar(80)
+  address   String?
+  phone     String?  @db.VarChar(20)
+  isActive  Boolean   @default(true)
+  /// Master switch for public online booking of this branch.
+  acceptsOnlineBookings Boolean @default(true)
+  /// Home-consultation configuration (client-confirmed feature). No timings or
+  /// radius are invented — if these are null, the site shows neutral copy and
+  /// home requests are marked "Requires clinic confirmation".
+  homeConsultationsEnabled Boolean @default(false)
+  homeConsultationNote     String? @db.VarChar(300)
+  homeServiceAreas         String?
+  homeMaxPerDay            Int?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  staff       Staff[]
+  patients    Patient[]
+  services    BranchService[]
+  slots       AppointmentSlot[]
+  appointments Appointment[]
+  assessments HearingAssessment[]
+  followUps   FollowUp[]
+  galleryItems GalleryItem[]
+  aidInventory HearingAidInventoryItem[]
+  aidDemos     HearingAidDemo[]
+  aidFittings  HearingAidFitting[]
+  aidDispensings HearingAidDispensing[]
+  aidServiceRecords HearingAidServiceRecord[]
+  aidFollowUps HearingAidFollowUp[]
+}
+
+// ─── Organization & scheduling (Phase 2) ─────────────────────────────────────
+
+enum ServiceCategory {
+  DIAGNOSTIC
+  HEARING_TEST
+  HEARING_AID
+  THERAPY
+  COCHLEAR
+}
+
+/// Bookable service catalogue (admin-managed). Public service pages read this.
+model Service {
+  id              String          @id @default(cuid())
+  code            String          @unique @db.VarChar(30)
+  name            String
+  category        ServiceCategory
+  description     String?
+  durationMinutes Int             @default(30)
+  isActive        Boolean         @default(true)
+  sortOrder       Int             @default(0)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  branches     BranchService[]
+  appointments Appointment[]
+  slots        AppointmentSlot[]
+}
+
+/// Which branch offers which service (M:N).
+model BranchService {
+  branchId  String
+  serviceId String
+  isActive  Boolean @default(true)
+
+  branch  Branch  @relation(fields: [branchId], references: [id])
+  service Service @relation(fields: [serviceId], references: [id])
+
+  @@id([branchId, serviceId])
+}
+
+enum SlotStatus {
+  OPEN
+  BOOKED
+  BLOCKED
+}
+
+/// Bookable time window generated by clinic staff/admin. Occupancy is enforced
+/// by appointments.slotId being unique — never by UI state.
+model AppointmentSlot {
+  id        String     @id @default(cuid())
+  branchId  String
+  staffId   String?
+  serviceId String?
+  startsAt  DateTime
+  endsAt    DateTime
+  status    SlotStatus @default(OPEN)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  branch      Branch            @relation(fields: [branchId], references: [id])
+  staff       Staff?            @relation(fields: [staffId], references: [id])
+  service     Service?          @relation(fields: [serviceId], references: [id])
+  appointments Appointment[]
+
+  @@unique([branchId, startsAt, staffId])
+  @@index([branchId, status, startsAt])
+  @@index([staffId, startsAt])
+}
+
+enum AppointmentStatus {
+  BOOKED
+  CHECKED_IN
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum AppointmentSource {
+  ONLINE
+  STAFF
+  WALK_IN
+}
+
+enum AppointmentType {
+  CLINIC_VISIT
+  HOME_CONSULTATION
+}
+
+enum HomeConfirmationStatus {
+  PENDING_CONFIRMATION
+  CONFIRMED
+  DECLINED
+}
+
+/// One ACTIVE appointment claims exactly one slot. Uniqueness against
+/// double-booking is enforced by a partial unique index on slotId for active
+/// statuses (BOOKED/CHECKED_IN/IN_PROGRESS) — cancelled/completed rows keep
+/// their slotId for history without blocking the slot from being rebooked.
+model Appointment {
+  id         String            @id @default(cuid())
+  patientId  String
+  slotId     String?
+  serviceId  String
+  branchId   String
+  staffId    String?
+  status     AppointmentStatus @default(BOOKED)
+  source     AppointmentSource @default(ONLINE)
+  bookedById String?
+  reason     String?           @db.VarChar(300)
+  cancelReason String?         @db.VarChar(300)
+  /// Public, human-friendly booking reference (QHC-XXXXXX). Safe to share.
+  bookingRef String?           @unique
+  /// CLINIC_VISIT (at a branch) or HOME_CONSULTATION (team visits the patient).
+  appointmentType AppointmentType @default(CLINIC_VISIT)
+  /// HOME_CONSULTATION only — where the team should visit. Never exposed
+  /// publicly; visible to authorized staff/admin in the portal only.
+  homeAddress     String?    @db.VarChar(400)
+  homeLocality    String?    @db.VarChar(200)
+  homeInstructions String?   @db.VarChar(300)
+  /// Home requests start as PENDING_CONFIRMATION when no service-area rule
+  /// applies; clinic staff flip it to CONFIRMED after checking feasibility.
+  homeConfirmationStatus HomeConfirmationStatus?
+  /// SHA-256 of the guest's private management token — enables the visitor to
+  /// view/cancel their own booking without an account. Raw token is never stored.
+  manageTokenHash String?
+  /// Client-supplied idempotency key: retried submissions return the original
+  /// booking instead of creating a duplicate.
+  idempotencyKey String?       @unique
+  createdAt  DateTime          @default(now())
+  updatedAt  DateTime @updatedAt
+
+  patient  Patient          @relation(fields: [patientId], references: [id])
+
+  slot     AppointmentSlot? @relation(fields: [slotId], references: [id])
+
+  service  Service          @relation(fields: [serviceId], references: [id])
+  branch   Branch           @relation(fields: [branchId], references: [id])
+  staff    Staff?           @relation("AppointmentProvider", fields: [staffId], references: [id])
+  bookedBy User?            @relation("AppointmentBooker", fields: [bookedById], references: [id])
+  assessments HearingAssessment[]
+
+  @@index([patientId, status])
+  @@index([branchId, status])
+  @@index([staffId, status])
+}
+
+
+/// In-app notifications (user-scoped). Email/SMS transport is a later phase.
+model Notification {
+  id         String    @id @default(cuid())
+  userId     String?
+  type       String    @db.VarChar(50)
+  title      String
+  body       String
+  entityType String?   @db.VarChar(50)
+  entityId   String?
+  readAt     DateTime?
+  createdAt  DateTime  @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+
+  @@index([userId, readAt])
+}
+
+/// Public contact-form enquiries (name/mobile/email/message + optional interest).
+/// No email backend is configured, so enquiries are stored for admin review
+/// only — nothing pretends to have been emailed. Mobile/email are private and
+/// never exposed publicly.
+model ContactEnquiry {
+  id          String   @id @default(cuid())
+  name        String   @db.VarChar(120)
+  mobile      String   @db.VarChar(20)
+  email       String?  @db.VarChar(200)
+  interest    String?  @db.VarChar(60)
+  appointmentType String? @db.VarChar(30)
+  message     String   @db.VarChar(2000)
+  status      EnquiryStatus @default(NEW)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([status, createdAt])
+}
+
+enum EnquiryStatus {
+  NEW
+  IN_PROGRESS
+  RESOLVED
+}
+
+// ─── Clinical core (Phase 3) ─────────────────────────────────────────────────
+
+enum AssessmentStatus {
+  DRAFT
+  COMPLETED
+  REVIEWED
+  REPORTED
+  CANCELLED
+}
+
+/// Encounter-level record: case history + container for test results.
+/// State machine: DRAFT → COMPLETED → REVIEWED → REPORTED.
+model HearingAssessment {
+  id             String           @id @default(cuid())
+  patientId      String
+  audiologistId  String?
+  reviewedById   String?
+  appointmentId  String?          @unique
+  branchId       String?
+  status         AssessmentStatus @default(DRAFT)
+  referredBy     String?          @db.VarChar(120)
+  complaints     String?
+  history        String?
+  reviewText     String?
+  reviewedAt     DateTime?
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  patient     Patient            @relation(fields: [patientId], references: [id])
+  audiologist Staff?             @relation("AssessmentAudiologist", fields: [audiologistId], references: [id])
+  reviewer    Staff?             @relation("AssessmentReviewer", fields: [reviewedById], references: [id])
+  appointment Appointment?       @relation(fields: [appointmentId], references: [id])
+  branch      Branch?             @relation(fields: [branchId], references: [id])
+  testResults TestResult[]
+  notes       ClinicalNote[]
+  reports     Report[]
+  followUps   FollowUp[]
+  aidRecommendations HearingAidRecommendation[]
+  aidFittings   HearingAidFitting[]
+
+  @@index([patientId, status])
+  @@index([branchId, status])
+  @@index([audiologistId])
+}
+
+enum TestType {
+  PTA
+  SPEECH
+  TYMPANOMETRY
+  ABR
+  OAE
+  VESTIBULAR
+  TINNITUS
+  SPECIALIZED
+}
+
+/// One row per test performed. Payload is typed JSON validated by Zod
+/// (src/lib/validation/clinical.ts) — stored data, never auto-interpretation.
+model TestResult {
+  id            String    @id @default(cuid())
+  assessmentId  String
+  testType      TestType
+  payload       Json
+  performedById String?
+  performedAt   DateTime  @default(now())
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  assessment HearingAssessment @relation(fields: [assessmentId], references: [id])
+  performedBy Staff?           @relation(fields: [performedById], references: [id])
+  audiogram   Audiogram?
+
+  @@index([assessmentId])
+}
+
+/// 1:1 with a PTA TestResult. Thresholds in dB HL per frequency (250 Hz–8 kHz),
+/// air + bone conduction, per ear. Stored data — interpretation lives in
+/// signed notes / review text.
+model Audiogram {
+  id           String   @id @default(cuid())
+  testResultId String   @unique
+  data         Json
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  testResult TestResult @relation(fields: [testResultId], references: [id])
+}
+
+/// Clinical note. Once signed it is immutable; corrections create a new note
+/// (supersedesId) — never an edit of signed content.
+model ClinicalNote {
+  id           String    @id @default(cuid())
+  patientId    String
+  authorId     String
+  assessmentId String?
+  body         String    @db.Text
+  isSigned     Boolean   @default(false)
+  signedAt     DateTime?
+  supersedesId String?   @unique
+  createdAt    DateTime  @default(now())
+
+  patient    Patient            @relation(fields: [patientId], references: [id])
+  author     Staff              @relation(fields: [authorId], references: [id])
+  assessment HearingAssessment? @relation(fields: [assessmentId], references: [id])
+  supersededBy ClinicalNote?    @relation("NoteSupersedes", fields: [supersedesId], references: [id])
+  supersedes   ClinicalNote?    @relation("NoteSupersedes")
+
+  @@index([patientId])
+  @@index([assessmentId])
+}
+
+enum ReportStatus {
+  DRAFT
+  FINAL
+}
+
+/// Generated clinical report. Content is a snapshot (JSON) of the assessment,
+/// tests, and audiogram at generation time; the printed view renders it.
+model Report {
+  id             String       @id @default(cuid())
+  patientId      String
+  assessmentId   String?
+  generatedById  String
+  finalizedById  String?
+  title          String
+  status         ReportStatus @default(DRAFT)
+  content        Json
+  createdAt      DateTime     @default(now())
+  finalizedAt    DateTime?
+  updatedAt      DateTime     @updatedAt
+
+  patient     Patient            @relation(fields: [patientId], references: [id])
+  assessment  HearingAssessment? @relation(fields: [assessmentId], references: [id])
+  generatedBy Staff              @relation("ReportGenerator", fields: [generatedById], references: [id])
+  finalizedBy Staff?             @relation("ReportFinalizer", fields: [finalizedById], references: [id])
+
+  @@index([patientId, status])
+  @@index([assessmentId])
+}
+
+enum FollowUpStatus {
+  PENDING
+  SCHEDULED
+  DONE
+  CANCELLED
+}
+
+/// Follow-up queue items (Phase 4 wires the full therapy/fitting origins).
+model FollowUp {
+  id           String         @id @default(cuid())
+  patientId    String
+  branchId     String?
+  assessmentId String?
+  dueDate      DateTime
+  reason       String         @db.VarChar(200)
+  status       FollowUpStatus @default(PENDING)
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  patient    Patient            @relation(fields: [patientId], references: [id])
+  branch     Branch?            @relation(fields: [branchId], references: [id])
+  assessment HearingAssessment? @relation(fields: [assessmentId], references: [id])
+
+  @@index([status, dueDate])
+  @@index([patientId])
+}
+
+// ─── CMS (Phase 5 — minimal reference now) ───────────────────────────────────
+
+/// Gallery images for the public gallery page (admin-managed).
+model GalleryItem {
+  id        String   @id @default(cuid())
+  branchId  String?
+  title     String
+  imageUrl  String
+  caption   String?
+  sortOrder Int      @default(0)
+  isActive  Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  branch Branch? @relation(fields: [branchId], references: [id])
+
+  @@index([isActive, sortOrder])
+}
+
+// ─── Hearing-aid lifecycle (Phase 4) ────────────────────────────────────────
+
+enum DeviceType {
+  BTE
+  RIC
+  ITE
+  ITC
+  CIC
+  IIC
+}
+
+enum TechnologyLevel {
+  PREMIUM
+  ADVANCED
+  MID
+  ESSENTIAL
+}
+
+/// Manufacturer/brand catalogue. Admin-managed; no hardcoded brands.
+/// Presence in this catalogue does NOT imply manufacturer partnership.
+model HearingAidBrand {
+  id          String   @id @default(cuid())
+  name        String   @unique @db.VarChar(80)
+  description String?
+  logoUrl     String?
+  website     String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  models HearingAidModel[]
+}
+
+enum ModelStatus {
+  ACTIVE
+  INACTIVE
+}
+
+/// Catalogue product (not a physical device). M:N features via join table.
+model HearingAidModel {
+  id              String          @id @default(cuid())
+  brandId         String
+  modelName       String
+  modelCode       String          @unique @db.VarChar(40)
+  deviceType      DeviceType
+  technologyLevel TechnologyLevel
+  description     String?
+  priceInr        Int? // catalogue price band; null = not published
+  warrantyMonths  Int?
+  isFeatured      Boolean         @default(false) // curate homepage showcase
+  status          ModelStatus     @default(ACTIVE)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+
+  brand       HearingAidBrand            @relation(fields: [brandId], references: [id])
+  features    HearingAidModelFeature[]
+  inventory   HearingAidInventoryItem[]
+  recommendations HearingAidRecommendation[]
+  accessories HearingAidAccessoryCompatibility[]
+
+  @@unique([brandId, modelName])
+  @@index([deviceType, status])
+}
+
+/// Normalized feature tags (rechargeable, bluetooth, telecoil, …).
+model HearingAidFeature {
+  id          String  @id @default(cuid())
+  key         String  @unique @db.VarChar(40) // stable slug, e.g. "rechargeable"
+  label       String  @db.VarChar(80)
+  description String?
+  category    String? @db.VarChar(40) // power | connectivity | sound | comfort | warranty
+  models      HearingAidModelFeature[]
+}
+
+/// Feature values per model (with optional free-text detail, e.g. channels).
+model HearingAidModelFeature {
+  modelId   String
+  featureId String
+  detail    String? @db.VarChar(120)
+
+  model   HearingAidModel   @relation(fields: [modelId], references: [id])
+  feature HearingAidFeature @relation(fields: [featureId], references: [id])
+
+  @@id([modelId, featureId])
+}
+
+enum InventoryStatus {
+  AVAILABLE
+  RESERVED
+  DEMO
+  FITTED
+  DISPENSED
+  REPAIR
+  RETIRED
+}
+
+enum DeviceCondition {
+  NEW
+  REFURBISHED
+  USED
+  DAMAGED
+}
+
+/// PHYSICAL DEVICE. One catalogue model → many serial-numbered items.
+/// demoStatus overlays inventoryStatus for the demo-assignment invariant.
+model HearingAidInventoryItem {
+  id            String          @id @default(cuid())
+  modelId       String
+  branchId      String
+  serialNo      String          @unique @db.VarChar(60)
+  status        InventoryStatus @default(AVAILABLE)
+  condition     DeviceCondition @default(NEW)
+  acquiredAt    DateTime?
+  acquiredNote  String?         @db.VarChar(200) // acquisition info (no supplier integration)
+  unitCostInr   Int? // RESTRICTED: never rendered to patients
+  notes         String?         @db.VarChar(300)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  model       HearingAidModel          @relation(fields: [modelId], references: [id])
+  branch      Branch                   @relation(fields: [branchId], references: [id])
+  demos       HearingAidDemo[]
+  fittings    HearingAidFitting[]
+  dispensings HearingAidDispensing[]
+  warranties  HearingAidWarranty[]
+  serviceRecs HearingAidServiceRecord[]
+  aftercare   HearingAidFollowUp[]
+
+  @@index([modelId, status])
+  @@index([branchId, status])
+}
+
+enum RecommendationStatus {
+  DRAFT
+  UNDER_REVIEW
+  APPROVED
+  DECLINED
+  EXPIRED
+  CANCELLED
+}
+
+enum PatientDecision {
+  PENDING
+  ACCEPTED
+  DECLINED
+  NEEDS_REVIEW
+}
+
+/// Audiologist-authored professional recommendation. The system NEVER
+/// auto-generates one; selection, notes, and approval are human actions.
+model HearingAidRecommendation {
+  id            String              @id @default(cuid())
+  patientId     String
+  assessmentId  String?
+  audiologistId String
+  modelId       String
+  status        RecommendationStatus @default(DRAFT)
+  patientDecision PatientDecision   @default(PENDING)
+  decisionAt    DateTime?
+  reason        String              @db.VarChar(1000) // professional rationale
+  listeningNeeds String?            @db.VarChar(600)
+  communicationPrefs String?        @db.VarChar(600)
+  handlingNotes String?             @db.VarChar(600)
+  professionalConsiderations String? @db.VarChar(600)
+  followUpPlan  String?             @db.VarChar(400)
+  approvedAt    DateTime?
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+
+  patient     Patient           @relation(fields: [patientId], references: [id])
+  assessment  HearingAssessment? @relation(fields: [assessmentId], references: [id])
+  audiologist Staff             @relation("RecommendationAudiologist", fields: [audiologistId], references: [id])
+  model       HearingAidModel   @relation(fields: [modelId], references: [id])
+  fittings    HearingAidFitting[]
+  dispensings HearingAidDispensing[]
+
+  @@index([patientId, status])
+  @@index([audiologistId])
+  @@index([assessmentId])
+}
+
+enum DemoStatus {
+  SCHEDULED
+  ACTIVE
+  RETURNED
+  CANCELLED
+  OVERDUE
+}
+
+/// Trial of a PHYSICAL device. Overlapping ACTIVE/SCHEDULED demos of the same
+/// device are blocked in the service layer (verified by integration test).
+model HearingAidDemo {
+  id             String     @id @default(cuid())
+  patientId      String
+  inventoryItemId String
+  staffId        String
+  branchId       String
+  status         DemoStatus @default(SCHEDULED)
+  startedAt      DateTime?
+  expectedReturnAt DateTime
+  actualReturnAt DateTime?
+  patientFeedback String?   @db.VarChar(600)
+  notes          String?    @db.VarChar(400)
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
+
+  patient   Patient                  @relation(fields: [patientId], references: [id])
+  item      HearingAidInventoryItem  @relation(fields: [inventoryItemId], references: [id])
+  staff     Staff                    @relation("DemoStaff", fields: [staffId], references: [id])
+  branch    Branch                   @relation(fields: [branchId], references: [id])
+
+  @@index([inventoryItemId, status])
+  @@index([patientId, status])
+}
+
+enum FittingStatus {
+  PLANNED
+  IN_PROGRESS
+  COMPLETED
+  FOLLOW_UP_REQUIRED
+  CANCELLED
+}
+
+enum EarSide {
+  RIGHT
+  LEFT
+  BILATERAL
+}
+
+/// Fitting & programming RECORD (documentation — not a live device link).
+model HearingAidFitting {
+  id             String        @id @default(cuid())
+  patientId      String
+  inventoryItemId String
+  audiologistId  String
+  recommendationId String?
+  assessmentId   String?
+  branchId       String
+  earSide        EarSide
+  status         FittingStatus @default(PLANNED)
+  fittingDate    DateTime?
+  programmingSummary String?   @db.VarChar(600) // manual summary; no device API claim
+  verificationNotes  String?   @db.VarChar(600)
+  patientFeedback    String?   @db.VarChar(600)
+  notes          String?       @db.VarChar(400)
+  followUpDate   DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  patient       Patient                 @relation(fields: [patientId], references: [id])
+  item          HearingAidInventoryItem @relation(fields: [inventoryItemId], references: [id])
+  audiologist   Staff                   @relation("FittingAudiologist", fields: [audiologistId], references: [id])
+  recommendation HearingAidRecommendation? @relation(fields: [recommendationId], references: [id])
+  assessment    HearingAssessment?      @relation(fields: [assessmentId], references: [id])
+  branch        Branch                  @relation(fields: [branchId], references: [id])
+  dispensings   HearingAidDispensing[]
+  aftercare     HearingAidFollowUp[]
+
+  @@index([patientId, status])
+  @@index([inventoryItemId])
+}
+
+enum DispensingStatus {
+  PREPARED
+  DISPENSED
+  CANCELLED
+  RETURNED
+}
+
+/// Delivery/dispensing record. Separate from recommendation & payment.
+model HearingAidDispensing {
+  id               String            @id @default(cuid())
+  patientId        String
+  inventoryItemId  String
+  recommendationId String?
+  fittingId        String?
+  branchId         String
+  dispensedById    String
+  status           DispensingStatus  @default(PREPARED)
+  dispensedAt      DateTime?
+  notes            String?           @db.VarChar(400)
+  patientAcknowledgedAt DateTime?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  patient        Patient                 @relation(fields: [patientId], references: [id])
+  item           HearingAidInventoryItem @relation(fields: [inventoryItemId], references: [id])
+  recommendation HearingAidRecommendation? @relation(fields: [recommendationId], references: [id])
+  fitting        HearingAidFitting?      @relation(fields: [fittingId], references: [id])
+  branch         Branch                  @relation(fields: [branchId], references: [id])
+  dispensedBy    Staff                   @relation("DispensingStaff", fields: [dispensedById], references: [id])
+
+  @@index([patientId, status])
+  @@index([inventoryItemId])
+}
+
+enum WarrantyStatus {
+  ACTIVE
+  EXPIRED
+  CLAIM_IN_PROGRESS
+  CLOSED
+}
+
+/// Warranty as recorded & verified — never invented or implied.
+model HearingAidWarranty {
+  id             String         @id @default(cuid())
+  patientId      String
+  inventoryItemId String
+  provider       String         @db.VarChar(120)
+  reference      String?        @db.VarChar(60)
+  startDate      DateTime
+  endDate        DateTime
+  coverageNotes  String?        @db.VarChar(400)
+  status         WarrantyStatus @default(ACTIVE)
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  patient Patient                 @relation(fields: [patientId], references: [id])
+  item    HearingAidInventoryItem @relation(fields: [inventoryItemId], references: [id])
+
+  @@index([patientId])
+  @@index([inventoryItemId])
+}
+
+enum ServiceStatus {
+  REPORTED
+  UNDER_REVIEW
+  SENT_FOR_REPAIR
+  REPAIRED
+  READY_FOR_COLLECTION
+  COMPLETED
+  CANCELLED
+}
+
+enum ServiceType {
+  REPAIR
+  CLEANING
+  PART_REPLACE
+  CHECKUP
+}
+
+/// Repair/service history tied to the PHYSICAL device.
+model HearingAidServiceRecord {
+  id              String        @id @default(cuid())
+  patientId       String
+  inventoryItemId String
+  branchId        String?
+  assignedStaffId String?
+  serviceType     ServiceType   @default(REPAIR)
+  status          ServiceStatus @default(REPORTED)
+  issueDescription String       @db.VarChar(600)
+  reportedAt      DateTime      @default(now())
+  resolutionNotes String?       @db.VarChar(600)
+  completedAt     DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  patient      Patient                 @relation(fields: [patientId], references: [id])
+  item         HearingAidInventoryItem @relation(fields: [inventoryItemId], references: [id])
+  branch       Branch?                 @relation(fields: [branchId], references: [id])
+  assignedTo   Staff?                  @relation("ServiceAssignee", fields: [assignedStaffId], references: [id])
+
+  @@index([patientId, status])
+  @@index([inventoryItemId])
+}
+
+enum AccessoryCategory {
+  DOME
+  RECEIVER
+  EARMOULD
+  CHARGER
+  BATTERY
+  CLEANING
+  CONNECTIVITY
+  OTHER
+}
+
+/// Accessory catalogue. Compatibility links are explicit — never invented.
+model HearingAidAccessory {
+  id          String            @id @default(cuid())
+  name        String
+  category    AccessoryCategory
+  description String?
+  priceInr    Int?
+  isActive    Boolean           @default(true)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  compatibleModels HearingAidAccessoryCompatibility[]
+}
+
+model HearingAidAccessoryCompatibility {
+  accessoryId String
+  modelId     String
+
+  accessory HearingAidAccessory @relation(fields: [accessoryId], references: [id])
+  model     HearingAidModel     @relation(fields: [modelId], references: [id])
+
+  @@id([accessoryId, modelId])
+}
+
+enum AftercareStatus {
+  PENDING
+  SCHEDULED
+  DONE
+  CANCELLED
+}
+
+enum AftercareReason {
+  INITIAL_FITTING_REVIEW
+  COMFORT_REVIEW
+  LISTENING_REVIEW
+  CLEANING_GUIDANCE
+  BATTERY_CHARGING_GUIDANCE
+  DEVICE_MAINTENANCE
+  OTHER
+}
+
+/// Hearing-aid aftercare follow-ups (distinct from clinical FollowUp).
+model HearingAidFollowUp {
+  id            String           @id @default(cuid())
+  patientId     String
+  fittingId     String?
+  inventoryItemId String?
+  audiologistId String?
+  branchId      String?
+  reason        AftercareReason
+  dueDate       DateTime
+  notes         String?          @db.VarChar(400)
+  outcome       String?          @db.VarChar(600) // documented by professionals
+  status        AftercareStatus  @default(PENDING)
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  patient Patient                 @relation(fields: [patientId], references: [id])
+  fitting HearingAidFitting?      @relation(fields: [fittingId], references: [id])
+  item    HearingAidInventoryItem? @relation(fields: [inventoryItemId], references: [id])
+  audiologist Staff?              @relation("AftercareAudiologist", fields: [audiologistId], references: [id])
+  branch  Branch?                 @relation(fields: [branchId], references: [id])
+
+  @@index([status, dueDate])
+  @@index([patientId])
+}
+
+// ─── Audit ───────────────────────────────────────────────────────────────────
+
+/// Append-only audit trail. Metadata must never contain PHI, passwords, or
+/// tokens — entity type + id only. See docs/AUTH.md §security.
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String?
+  action     String   @db.VarChar(100)
+  entityType String?  @db.VarChar(50)
+  entityId   String?
+  metadata   Json?
+  ip         String?
+  userAgent  String?
+  createdAt  DateTime @default(now())
+
+  actor User? @relation("AuditActor", fields: [actorId], references: [id])
+
+  @@index([actorId])
+  @@index([entityType, entityId])
+  @@index([createdAt])
+}
+
+// ─── Planned entities (later phases — see docs/DATABASE.md) ─────────────────
+// hearing_aid_brands/models/features/recommendations/fittings/service_records
+// therapy_services (folded into Service THERAPY category), therapy_plans,
+// therapy_sessions, blog_posts
