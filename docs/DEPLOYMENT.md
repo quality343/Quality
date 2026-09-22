@@ -25,7 +25,7 @@ verified against `src/lib/env.ts`, `src/lib/env-guard.ts` and
 | `TURSO_AUTH_TOKEN` | server | `turso db tokens create <name>` | A remote Turso database refuses anonymous connections, so every query fails. This token grants **read-write** access to all clinic data — treat it as a password. |
 | `AUTH_SECRET` | server | `openssl rand -base64 32` | Auth.js cannot sign sessions — `/login` is unusable. Use a **different value per environment**; never reuse the dev one. |
 | `AUTH_TRUST_HOST` | server | `true` | **The one that bites.** Auth.js v5 auto-trusts the host only on Vercel/Cloudflare. On Netlify's proxy, staff sign-in fails with `UntrustedHost`. |
-| `NEXT_PUBLIC_SITE_URL` | build + client | `https://qualityhearing.netlify.app` (or the custom domain) | Canonical tags, `sitemap.xml` and `robots.txt` emit `localhost:3000`. Inlined at **build time** — changing it needs a redeploy, not a restart. |
+| `NEXT_PUBLIC_SITE_URL` | build + client | `https://qualityhearingcarepro.in` — **already set in `netlify.toml`**, so nothing to add in the UI | Only an override: canonical tags, `sitemap.xml` and `robots.txt` fall back to that same domain from `src/lib/site-url.ts`. It is inlined at **build time** — changing it needs a redeploy, not a restart. |
 | `GOOGLE_SHEETS_WEBHOOK_URL` | server | The Apps Script web-app URL, ending in **`/exec`** | Appointments are not mirrored to the spreadsheet. Bookings still work. |
 | `GOOGLE_SHEETS_WEBHOOK_SECRET` | server | `openssl rand -hex 32`, matching `SHEET_WEBHOOK_SECRET` in the Apps Script | Same, plus the build fails if only one of the pair is set. |
 
@@ -164,7 +164,7 @@ After deploying, confirm:
 - `/` and the other nine public routes return 200.
 - `/login` returns 200 and rejects bad credentials with a generic message.
 - An anonymous request to `/portal/admin` is redirected to `/login`.
-- `/sitemap.xml` and `/robots.txt` contain the production origin, not localhost.
+- `/sitemap.xml` and `/robots.txt` contain `https://qualityhearingcarepro.in`, not localhost.
 - `/portal/*` responses carry `X-Robots-Tag: noindex`.
 
 ---
@@ -178,7 +178,7 @@ After deploying, confirm:
 | Build fails in `db-prepare.ts` | The database is missing tables, or the double-booking index was dropped | Re-apply `prisma/migrations/00000000000001_init_sqlite/migration.sql` (or `--force` if the schema genuinely needs rebuilding). |
 | Build passes, but every page returns 500 | `TURSO_DATABASE_URL`/`TURSO_AUTH_TOKEN` wrong, expired, or the token lacks read-write access | Check the function logs — `src/instrumentation.ts` prints a loud `[env]` block at boot. A revoked Turso token is the usual cause. |
 | Staff sign-in fails, page reloads | `AUTH_TRUST_HOST` not `"true"` | Set it in the Netlify UI and redeploy. |
-| `sitemap.xml` shows `localhost:3000` | `NEXT_PUBLIC_SITE_URL` missing or set after the build | Set it and **redeploy** (it is inlined at build time). |
+| `sitemap.xml` shows an unexpected origin | `NEXT_PUBLIC_SITE_URL` set in the Netlify UI (that wins over `netlify.toml`) or set after the build | Correct it and **redeploy** (it is inlined at build time). Unset is fine — it falls back to the domain in `src/lib/site-url.ts`. |
 | Preview/branch builds fail with no database | Preview contexts have no DB | Set `SKIP_DB_MIGRATE=true` for those contexts. |
 
 ---

@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { SITE_URL } from "@/lib/site-url";
 import { listServices } from "@/server/services/queries";
 
 /**
@@ -8,7 +9,7 @@ import { listServices } from "@/server/services/queries";
  * absent — they are private surfaces and must never be indexed.
  */
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const base = (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
+  const base = SITE_URL;
   const now = new Date();
 
   const staticRoutes: { path: string; priority: number; changeFrequency: "weekly" | "monthly" }[] = [

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { PRODUCTION_SITE_URL } from "./site-url";
 
 /**
  * Server-side environment access. Import `serverEnv` only from server code
@@ -12,7 +13,7 @@ const serverSchema = z.object({
 });
 
 const publicSchema = z.object({
-  NEXT_PUBLIC_SITE_URL: z.string().url().default("http://localhost:3000"),
+  NEXT_PUBLIC_SITE_URL: z.string().url().default(PRODUCTION_SITE_URL),
 });
 
 const parsedServer = serverSchema.safeParse(process.env);

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter, Plus_Jakarta_Sans } from "next/font/google";
+import { SITE_URL } from "@/lib/site-url";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
@@ -10,8 +11,10 @@ const jakarta = Plus_Jakarta_Sans({
   weight: ["600", "700", "800"],
 });
 
-// TODO: set canonical production URL via NEXT_PUBLIC_SITE_URL at deploy time.
 export const metadata: Metadata = {
+  // Resolves every relative canonical/Open Graph URL against the real domain
+  // (see src/lib/site-url.ts) instead of Next's localhost fallback.
+  metadataBase: new URL(SITE_URL),
   title: {
     default: "QUALITY Hearing Care — JOY OF HEARING",
     template: "%s · QUALITY Hearing Care",

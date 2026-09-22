@@ -3,6 +3,7 @@ import { Photo } from "@/components/media/Photo";
 import { VideoPlayer } from "@/components/media/VideoPlayer";
 import { Reveal } from "@/components/motion/Reveal";
 import { VIDEO_ASPECT, type VideoSlot } from "@/lib/media";
+import { SITE_URL } from "@/lib/site-url";
 
 /**
  * The one reusable video section.
@@ -28,8 +29,7 @@ const TONE = {
 
 /** Absolute URL for structured data, matching robots.ts / sitemap.ts. */
 function absolute(path: string): string {
-  const base = (process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000").replace(/\/$/, "");
-  return `${base}${path.startsWith("/") ? path : `/${path}`}`;
+  return `${SITE_URL}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
 /**

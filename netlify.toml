@@ -23,6 +23,12 @@
   # package.json requires >=20.
   NODE_VERSION = "20"
   NEXT_TELEMETRY_DISABLED = "1"
+  # The canonical public origin. Not a secret, so it lives here: it is inlined
+  # at BUILD time into canonical tags, Open Graph URLs, sitemap.xml and
+  # robots.txt, and a deploy that misses it would otherwise advertise the
+  # fallback in src/lib/site-url.ts instead of the domain this site serves on.
+  # A value set in the Netlify UI still wins over this one.
+  NEXT_PUBLIC_SITE_URL = "https://qualityhearingcarepro.in"
 
 # Netlify auto-detects this for Next.js sites; declaring it keeps the config
 # self-describing and pins the major version.

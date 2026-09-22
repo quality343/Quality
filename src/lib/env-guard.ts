@@ -15,6 +15,8 @@
  * hosts. It never echoes a value, so nothing sensitive can reach a build log.
  */
 
+import { PRODUCTION_SITE_URL } from "./site-url";
+
 export type EnvFinding = {
   level: "error" | "warning";
   variable: string;
@@ -124,20 +126,23 @@ export function checkProductionEnv(
 
   // ── NEXT_PUBLIC_SITE_URL ──────────────────────────────────────────────────
   // Inlined at build time: canonical URLs, sitemap.xml and robots.txt all use it.
+  // Unset is not fatal — src/lib/site-url.ts falls back to the clinic's real
+  // domain — but it means a preview deploy would advertise the production
+  // origin, so it is worth stating out loud.
   const siteUrl = env.NEXT_PUBLIC_SITE_URL?.trim();
   const siteHost = hostOf(siteUrl);
   if (!siteUrl) {
     add({
       level: "warning",
       variable: "NEXT_PUBLIC_SITE_URL",
-      message: "Not set — sitemap.xml and robots.txt will emit http://localhost:3000 URLs.",
-      fix: "Set it to the deployed origin (e.g. https://qualityhearing.netlify.app).",
+      message: `Not set — canonical URLs, sitemap.xml and robots.txt fall back to ${PRODUCTION_SITE_URL}.`,
+      fix: "Set it to this deployment's origin (on a branch deploy, the preview URL).",
     });
   } else if (isLocalHost(siteHost)) {
     add({
       level: "warning",
       variable: "NEXT_PUBLIC_SITE_URL",
-      message: "Still points at localhost, so search engines would be given unreachable URLs.",
+      message: "Points at localhost, so search engines would be given unreachable URLs.",
       fix: "Set it to the deployed origin and redeploy (it is inlined at build time).",
     });
   }
