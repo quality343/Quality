@@ -141,7 +141,7 @@ export default function AboutPage() {
       <TestimonialVideos />
 
       {/* Clinic + contact */}
-      <section className="bg-surface">
+      <section className="bg-band-soft">
         <Container className="py-14 sm:py-20">
           <Reveal className="max-w-2xl">
             <p className="eyebrow text-brand-700">Our clinic</p>

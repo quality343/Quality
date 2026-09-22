@@ -116,7 +116,7 @@ export default function HomeConsultationPage() {
           an address. */}
       <VideoSection slot={VIDEO.homeConsultation} tone="tinted" />
 
-      <section className="bg-surface">
+      <section className="bg-band-soft">
         <Container className="py-14 sm:py-20">
           <Reveal>
             <div className="overflow-hidden rounded-3xl border border-border bg-surface shadow-card">

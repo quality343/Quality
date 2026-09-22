@@ -1,9 +1,15 @@
 # Photography — sources, licence, and how to replace it
 
-These images are **placeholder stock photography** chosen to give the site a
-finished, human feel until the clinic supplies its own photos. They are real
-photographs of real people — not AI-generated faces — because synthetic
-healthcare imagery measurably reduces trust.
+Two kinds of image live here:
+
+1. **Clinic-supplied product renders** — `hearing-aid-gold.jpg` and
+   `hearing-aid-pair.jpg`. These are the client's own artwork, supplied
+   directly, and they are the only images here that are ours. They are product
+   renders, not photographs of a clinic.
+2. **Placeholder stock photography** — everything else, chosen to give the site
+   a finished, human feel until the clinic supplies its own photos. They are
+   real photographs of real people — not AI-generated faces — because synthetic
+   healthcare imagery measurably reduces trust.
 
 ## Licence
 
@@ -14,8 +20,12 @@ covered by the **Pexels License**:
 - No attribution required (credits are still recorded below, as good practice).
 - May be modified, cropped and resized.
 
-No image in this folder shows a real hearing-aid brand, so nothing here implies
-a manufacturer relationship or a product claim.
+**Brand check before go-live.** The stock photographs show no hearing-aid brand,
+so none of them implies a manufacturer relationship or a product claim. The two
+client product renders do not carry a legible brand either — but the clinic's
+3D clip (`public/video/hearing-aid-3d.mp4`) shows a manufacturer's name on the
+shell. Someone at the clinic must confirm that is a brand they fit before that
+clip goes public on the homepage. See `public/video/README.md`.
 
 ## Files and credits
 
@@ -33,6 +43,17 @@ a manufacturer relationship or a product claim.
 | `listening-audio.jpg` | [photo/7983602](https://www.pexels.com/photo/an-elderly-man-watching-on-a-digital-tablet-7983602/) | Kampus Production |
 | `booking-help.jpg` | [photo/3823542](https://www.pexels.com/photo/young-positive-lady-showing-photos-on-smartphone-to-senior-man-while-sitting-at-laptop-3823542/) | Andrea Piacquadio |
 | `family-sofa.jpg` | [photo/7117615](https://www.pexels.com/photo/elderly-man-sitting-with-a-girl-7117615/) | cottonbro studio |
+
+## Clinic-supplied images
+
+| File | Source | Permission | Where it is used |
+| --- | --- | --- | --- |
+| `hearing-aid-gold.jpg` | Supplied by QUALITY Hearing Care (WhatsApp, 2026-09-22) | Owned by QUALITY Hearing Care | Poster/fallback still for the homepage device clip |
+| `hearing-aid-pair.jpg` | Supplied by QUALITY Hearing Care (WhatsApp, 2026-09-22) | Owned by QUALITY Hearing Care | Hearing-aids page hero card |
+
+Both are JPEGs at around 1250–1340px on the long edge, so they are fine at
+the sizes used here but are **not suitable for print or large banners**. Ask the
+clinic for the original render files if a bigger size is ever needed.
 
 ## Replacing these with the clinic's own photography
 

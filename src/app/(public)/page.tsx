@@ -5,6 +5,7 @@ import { AudiogramExplainer } from "@/components/brand/SoundWave";
 import { Reveal } from "@/components/motion/Reveal";
 import { Photo } from "@/components/media/Photo";
 import { HeroVideo } from "@/components/media/HeroVideo";
+import { DeviceClip } from "@/components/media/DeviceClip";
 import { VideoSection } from "@/components/media/VideoSection";
 import { VIDEO } from "@/lib/media";
 import { HearingSelfCheck } from "@/components/hearing/HearingSelfCheck";
@@ -436,7 +437,7 @@ export default async function HomePage() {
           devices. Until the clinic supplies footage this is a complete
           section in its own right: photograph, heading, text and CTA, with no
           play button (a play button that does nothing is a broken player). */}
-      <VideoSection slot={VIDEO.hearingCareMatters} tone="surface" />
+      <VideoSection slot={VIDEO.hearingCareMatters} tone="tinted" />
 
       {/* ══ 5. HEARING-AID SHOWCASE ══════════════════════════════════ */}
       <section className="relative overflow-hidden bg-brand-950 text-white">
@@ -476,21 +477,24 @@ export default async function HomePage() {
                and how fitting works instead of inventing products. */
             <Reveal className="mt-10">
               <div className="grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
-                <div className="relative mx-auto h-80 w-full max-w-md sm:h-96">
+                {/* The clinic's own slow turntable of a device, in the slot the
+                    drawn render used to fill. Same box, same glow behind it. */}
+                <div className="relative mx-auto w-full max-w-xl">
                   <div
-                    className="absolute inset-0 blur-3xl"
+                    className="absolute -inset-6 blur-3xl"
                     style={{
                       backgroundImage:
-                        "radial-gradient(closest-side, rgba(255,255,255,0.28), rgba(77,139,203,0.18) 60%, transparent)",
+                        "radial-gradient(closest-side, rgba(255,255,255,0.26), rgba(77,139,203,0.18) 60%, transparent)",
                     }}
                     aria-hidden="true"
                   />
-                  <div className="absolute inset-0 animate-float-slow">
-                    <HearingAidDevice
-                      className="h-full w-full drop-shadow-2xl"
-                      uid="homeShowcase"
-                    />
+                  <div className="relative">
+                    <DeviceClip />
                   </div>
+                  <p className="mt-4 text-center text-xs leading-relaxed text-brand-100/70">
+                    A look inside one of the styles we fit. Which device suits you
+                    is decided after your hearing test — never before it.
+                  </p>
                 </div>
 
                 <div>
@@ -726,7 +730,7 @@ export default async function HomePage() {
       </section>
 
       {/* ══ 7. SHARED SIGNS — interactive self-check ═════════════════ */}
-      <section className="bg-surface">
+      <section className="bg-band-soft">
         <Container className="py-16 sm:py-24">
           <Reveal className="max-w-3xl">
             <p className="eyebrow text-brand-700">Signs to look out for</p>
@@ -846,7 +850,7 @@ export default async function HomePage() {
       </section>
 
       {/* ══ 10. FAQ ══════════════════════════════════════════════════ */}
-      <section className="bg-surface">
+      <section className="bg-band-soft">
         <Container className="py-16 sm:py-24">
           <div className="grid gap-10 lg:grid-cols-[0.85fr_1.35fr] lg:items-start">
             <Reveal>

@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { Button, Container, Icon } from "@/components/ui";
 import { PageHero } from "@/components/layout/PageHero";
@@ -114,18 +115,16 @@ export default async function HearingAidsPage() {
         }
         aside={
           <div className="relative flex flex-col items-center rounded-3xl border border-white/12 bg-white/[0.06] p-6 shadow-glow backdrop-blur-md sm:p-8">
-            <div className="relative h-56 w-full sm:h-64">
-              <div
-                className="absolute inset-0 blur-2xl"
-                style={{
-                  backgroundImage:
-                    "radial-gradient(closest-side, rgba(255,255,255,0.3), transparent)",
-                }}
-                aria-hidden="true"
-              />
-              <HearingAidDevice
-                className="relative h-full w-full"
-                uid="aidHero"
+            {/* The clinic's own product render, mounted on a light card so the
+                pair reads clearly against the dark hero. */}
+            <div className="relative w-full overflow-hidden rounded-2xl bg-white shadow-float">
+              <Image
+                src={PHOTOS.hearingAidPair.src}
+                alt={PHOTOS.hearingAidPair.alt}
+                width={PHOTOS.hearingAidPair.width}
+                height={PHOTOS.hearingAidPair.height}
+                sizes="(min-width: 640px) 26rem, 80vw"
+                className="h-56 w-full object-contain sm:h-64"
               />
             </div>
             <p className="mt-3 text-center text-sm text-brand-100/85">
@@ -354,7 +353,7 @@ export default async function HearingAidsPage() {
       <VideoSection slot={VIDEO.hearingAids} tone="muted" />
 
       {/* Fitting journey */}
-      <section className="bg-surface">
+      <section className="bg-band-soft">
         <Container className="py-14 sm:py-20">
           <Reveal className="max-w-2xl">
             <p className="eyebrow text-brand-700">How fitting works</p>

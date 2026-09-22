@@ -124,6 +124,29 @@ export const PHOTOS = {
     src: "/images/family-sofa.jpg",
     alt: "An older man and a child talking together on a sofa at home",
   },
+
+  /**
+   * Client-supplied product render — one behind-the-ear device, shown as an
+   * example of the style we fit. It depicts no specific manufacturer's model,
+   * and no specification is claimed for it.
+   */
+  hearingAidGold: {
+    src: "/images/hearing-aid-gold.jpg",
+    width: 1254,
+    height: 1254,
+    alt: "A gold behind-the-ear hearing aid with a clear receiver wire and ear dome",
+  },
+
+  /**
+   * Client-supplied product render — two devices side by side, used where the
+   * point is the *choice* of device rather than one particular one.
+   */
+  hearingAidPair: {
+    src: "/images/hearing-aid-pair.jpg",
+    width: 1337,
+    height: 1177,
+    alt: "Two behind-the-ear hearing aids side by side, one silver and one gold",
+  },
 } as const satisfies Record<string, SitePhoto>;
 
 export type PhotoKey = keyof typeof PHOTOS;

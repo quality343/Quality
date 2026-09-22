@@ -149,7 +149,7 @@ export default async function HearingTestsPage() {
       <VideoSection slot={VIDEO.hearingTest} tone="tinted" />
 
       {/* Test catalogue */}
-      <section className="bg-surface">
+      <section className="bg-band-soft">
         <Container className="py-14 sm:py-20">
           <Reveal className="max-w-2xl">
             <p className="eyebrow text-brand-700">Our tests</p>

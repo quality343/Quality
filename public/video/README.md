@@ -1,9 +1,13 @@
 # Video — sources, licence, and how to replace this footage
 
-These are **stock clips under the Pexels License**, the same licence as the
+One clip here is the **clinic's own**: `hearing-aid-3d.mp4`, supplied directly
+by QUALITY Hearing Care and used on the homepage hearing-aid showcase. It carries
+no illustration note because it is genuinely ours.
+
+Every other clip is **stock under the Pexels License**, the same licence as the
 photographs in `public/images/`. They are placeholders standing in until the
-clinic supplies its own footage, and every one of them is labelled as
-illustrative on the page it appears on.
+clinic supplies the rest of its own footage, and every one of them is labelled
+as illustrative on the page it appears on.
 
 The single source of truth for what the site plays is **`src/lib/media.ts`**. No
 component references a video URL directly.
@@ -19,8 +23,9 @@ covered by the **Pexels License**:
 
 ## Files, sources and licence record
 
-| Slot (`src/lib/media.ts`) | File | Pexels source | Photographer | Licence | Attribution | Downloaded |
+| Slot (`src/lib/media.ts`) | File | Source | Photographer | Licence | Attribution | Notes |
 | --- | --- | --- | --- | --- | --- | --- |
+| `deviceShowcase` | `hearing-aid-3d.mp4` | **Supplied by QUALITY Hearing Care** (WhatsApp, 2026-09-21) | — | **Owned by QUALITY Hearing Care** | not required | 1280×720, H.264 + AAC, ~10 s loop, 2.8 MB |
 | `heroBackground` | `hero-couple-talking.mp4` | [video/8971243](https://www.pexels.com/video/an-elderly-couple-talking-to-each-other-8971243/) | not stated on source page | Pexels License | not required | 540p (~1.6 MB) |
 | `hearingCareMatters` | `couple-holding-hands.mp4` | [video/8164677](https://www.pexels.com/video/elderly-couple-holding-hands-on-the-table-8164677/) | not stated on source page | Pexels License | not required | 720p (~2.8 MB) |
 | `hearingTest` | `consultation.mp4` | [video/8375654](https://www.pexels.com/video/a-senior-doctor-having-an-online-consultation-8375654/) | Tima Miroshnichenko | Pexels License | not required | 506p (~2.3 MB) |
@@ -28,10 +33,19 @@ covered by the **Pexels License**:
 | `homeConsultation` | `home-checkup.mp4` | [video/8944262](https://www.pexels.com/video/elderly-woman-having-a-check-up-8944262/) | Kampus Production | Pexels License | not required | 720p (~3.7 MB) |
 | `finalCta` | `couple-in-park.mp4` | [video/8970846](https://www.pexels.com/video/an-elderly-couple-having-conversation-at-the-park-8970846/) | SHVETS production | Pexels License | not required | 540p (~3.5 MB) |
 
-**These clips have not been viewed by the developer who wired them in.** They were
-selected from Pexels' own titles and search metadata. Someone at the clinic must
-watch all six before go-live and confirm each is appropriate and matches what the
-copy claims about it. See "Review checklist" below.
+**The six Pexels clips have not been viewed by the developer who wired them in.**
+They were selected from Pexels' own titles and search metadata. Someone at the
+clinic must watch all six before go-live and confirm each is appropriate and
+matches what the copy claims about it. See "Review checklist" below.
+
+**`hearing-aid-3d.mp4` is different, and needs one decision.** It is the clinic's
+own render and its first frames show a manufacturer's name on the device shell
+(legible as "…AK" when zoomed). Nobody outside the clinic can confirm whether
+that is a brand they fit. Confirm it before this stays on the homepage: if the
+clinic does not fit that brand, the clip must be replaced, or re-exported with
+the marking cropped or covered. The homepage caption deliberately makes no claim
+about a specific model, but a visible competitor name on the page is a different
+problem from a caption.
 
 ## Review checklist before go-live
 

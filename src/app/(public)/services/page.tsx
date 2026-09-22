@@ -209,7 +209,7 @@ export default async function ServicesPage() {
       </section>
 
       {/* Closing CTA */}
-      <section className="bg-surface">
+      <section className="bg-band-soft">
         <Container className="py-14 sm:py-20">
           <Reveal>
             <div className="relative overflow-hidden rounded-3xl border border-brand-100 bg-gradient-to-br from-brand-50/70 to-surface p-8 shadow-card sm:p-12">

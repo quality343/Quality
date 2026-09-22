@@ -5,11 +5,14 @@ import { PHOTOS, type SitePhoto } from "@/lib/images";
  * website, mirroring `src/lib/images.ts` so no component hardcodes a URL.
  *
  * ─── The state of play ──────────────────────────────────────────────────────
- * QUALITY Hearing Care has not supplied footage of its own, so the slots below
- * currently carry **stock clips under the Pexels License** (free for commercial
- * use, no attribution required, modification permitted) — the same licence the
- * site's photographs already use. Every clip is recorded, with its source and
- * permission, in `public/video/README.md`.
+ * The clinic has now supplied **one clip of its own** — `deviceShowcase`, the
+ * product render of a behind-the-ear device on the homepage. It is owned by
+ * QUALITY Hearing Care and is the only clip described as ours on the page.
+ *
+ * Every other slot still carries **stock clips under the Pexels License** (free
+ * for commercial use, no attribution required, modification permitted) — the
+ * same licence the site's photographs already use. Every clip is recorded, with
+ * its source and permission, in `public/video/README.md`.
  *
  * These are placeholders in the honest sense: they are *labelled* as illustrative
  * in the page (`footageNote`), they show no product or clinic claim, and each one
@@ -216,6 +219,34 @@ export const VIDEO = {
       licence: "Pexels License",
       attributionRequired: false,
       url: "https://www.pexels.com/video/a-senior-doctor-having-an-online-consultation-8375654/",
+    },
+    captions: [],
+  } satisfies VideoSlot,
+
+  /**
+   * Homepage hearing-aid showcase — the clinic's own product render.
+   *
+   * This is the one clip on the site that is genuinely ours, so it carries no
+   * `footageNote` and no attribution: it is a slow turntable of a
+   * behind-the-ear device, used as the *visual* for the section that explains
+   * how devices are fitted. It shows one style, so the copy still makes no
+   * claim about a specific model, brand or specification — and unlike the
+   * interactive slots it plays as ambient decoration (`DeviceClip`), silent,
+   * looping, and paused for anyone who prefers reduced motion.
+   */
+  deviceShowcase: {
+    id: "device-showcase",
+    eyebrow: "Hearing aids",
+    title: "Modern devices, professionally fitted",
+    description:
+      "A slow look at one of the styles we fit. What makes any device work is how precisely it is programmed to your hearing and the situations you actually find difficult — never the device on its own.",
+    poster: PHOTOS.hearingAidGold,
+    aspect: "video",
+    clip: { kind: "file", src: "/video/hearing-aid-3d.mp4" },
+    licence: {
+      source: "Client-supplied — QUALITY Hearing Care",
+      licence: "Owned by QUALITY Hearing Care",
+      attributionRequired: false,
     },
     captions: [],
   } satisfies VideoSlot,
