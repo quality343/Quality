@@ -51,15 +51,29 @@ export default async function BranchDetailPage({ params }: { params: Params }) {
 
         <Card className="mt-8">
           <h2 className="text-base font-semibold text-ink-900">Address</h2>
-          <address className="mt-2 text-sm not-italic leading-relaxed text-ink-600">
-            {address.split(",").map((line, i) => (
-              <span key={i} className="block">
-                {line.trim()}
-              </span>
-            ))}
-          </address>
+          <a
+            href={mapsUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Open this clinic's location in Google Maps (opens in a new tab)"
+            className="mt-2 block"
+          >
+            <address className="text-sm not-italic leading-relaxed text-ink-600 underline-offset-4 hover:text-brand-700 hover:underline">
+              {address.split(",").map((line, i) => (
+                <span key={i} className="block">
+                  {line.trim()}
+                </span>
+              ))}
+            </address>
+          </a>
           <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-            <Button href={mapsUrl} variant="secondary">
+            <Button
+              href={mapsUrl}
+              variant="secondary"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Open this clinic's location in Google Maps (opens in a new tab)"
+            >
               <Icon name="map-pin" className="h-4 w-4" />
               Get Directions
             </Button>

@@ -162,15 +162,26 @@ export default function AboutPage() {
                   <Icon name="map-pin" className="h-6 w-6" />
                 </span>
                 <h3 className="mt-5 font-display font-semibold text-ink-900">Where we are</h3>
-                <address className="mt-3 flex-1 space-y-1 not-italic text-sm leading-relaxed text-ink-600">
-                  {CLIENT.addressLines.map((line) => (
-                    <span key={line} className="block">
-                      {line}
-                    </span>
-                  ))}
-                </address>
                 <a
                   href={CLIENT.mapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Open Quality Hearing Care location in Google Maps (opens in a new tab)"
+                  className="mt-3 flex-1"
+                >
+                  <address className="space-y-1 not-italic text-sm leading-relaxed text-ink-600 underline-offset-4 hover:text-brand-700 hover:underline">
+                    {CLIENT.addressLines.map((line) => (
+                      <span key={line} className="block">
+                        {line}
+                      </span>
+                    ))}
+                  </address>
+                </a>
+                <a
+                  href={CLIENT.mapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Open Quality Hearing Care location in Google Maps (opens in a new tab)"
                   className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-brand-700 hover:text-brand-800"
                 >
                   Get Directions

@@ -932,15 +932,30 @@ export default async function HomePage() {
                   <h2 className="headline mt-3 text-2xl text-ink-900 sm:text-3xl">
                     Kukatpally, Hyderabad
                   </h2>
-                  <address className="mt-5 space-y-1 not-italic leading-relaxed text-ink-600">
-                    {CLIENT.addressLines.map((line) => (
-                      <span key={line} className="block">
-                        {line}
-                      </span>
-                    ))}
-                  </address>
+                  <a
+                    href={CLIENT.mapsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Open Quality Hearing Care location in Google Maps (opens in a new tab)"
+                    className="mt-5 block"
+                  >
+                    <address className="space-y-1 not-italic leading-relaxed text-ink-600 underline-offset-4 hover:text-brand-700 hover:underline">
+                      {CLIENT.addressLines.map((line) => (
+                        <span key={line} className="block">
+                          {line}
+                        </span>
+                      ))}
+                    </address>
+                  </a>
                   <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-                    <Button href={CLIENT.mapsUrl} variant="secondary" className="btn-lift">
+                    <Button
+                      href={CLIENT.mapsUrl}
+                      variant="secondary"
+                      className="btn-lift"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Open Quality Hearing Care location in Google Maps (opens in a new tab)"
+                    >
                       <Icon name="map-pin" className="h-4 w-4" />
                       Get Directions
                     </Button>

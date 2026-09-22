@@ -22,6 +22,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { path: "/branches", priority: 0.7, changeFrequency: "monthly" },
     { path: "/contact", priority: 0.7, changeFrequency: "monthly" },
     { path: "/blog", priority: 0.5, changeFrequency: "monthly" },
+    { path: "/terms-and-conditions", priority: 0.3, changeFrequency: "monthly" },
+    { path: "/privacy-policy", priority: 0.3, changeFrequency: "monthly" },
+    { path: "/appointment-policy", priority: 0.4, changeFrequency: "monthly" },
   ];
 
   // Service detail pages are database-driven, so they stay in step with the

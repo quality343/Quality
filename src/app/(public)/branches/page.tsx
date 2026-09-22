@@ -43,6 +43,9 @@ export default async function BranchesPage() {
               variant="secondary"
               size="lg"
               className="btn-lift !border-white/25 !bg-white/[0.08] !text-white hover:!border-white/50 hover:!text-white"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Open Quality Hearing Care location in Google Maps (opens in a new tab)"
             >
               <Icon name="map-pin" className="h-5 w-5" />
               Get Directions
@@ -52,13 +55,21 @@ export default async function BranchesPage() {
         aside={
           <div className="rounded-3xl border border-white/12 bg-white/[0.06] p-7 shadow-glow backdrop-blur-md">
             <p className="eyebrow text-brand-200">Clinic address</p>
-            <address className="mt-3 space-y-1 not-italic leading-relaxed text-brand-100/90">
-              {CLIENT.addressLines.map((line) => (
-                <span key={line} className="block">
-                  {line}
-                </span>
-              ))}
-            </address>
+            <a
+              href={CLIENT.mapsUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Open Quality Hearing Care location in Google Maps (opens in a new tab)"
+              className="mt-3 block"
+            >
+              <address className="space-y-1 not-italic leading-relaxed text-brand-100/90 underline-offset-4 hover:text-white hover:underline">
+                {CLIENT.addressLines.map((line) => (
+                  <span key={line} className="block">
+                    {line}
+                  </span>
+                ))}
+              </address>
+            </a>
             <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 border-t border-white/10 pt-5 text-sm">
               <a
                 href={CLIENT.phoneHref}
@@ -176,6 +187,9 @@ export default async function BranchesPage() {
                         ) : null}
                         <a
                           href={CLIENT.mapsUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label="Open Quality Hearing Care location in Google Maps (opens in a new tab)"
                           className="flex items-center gap-3 rounded-2xl border border-border bg-surface p-4 text-sm font-semibold text-ink-900 transition-all hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-lift"
                         >
                           <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700">

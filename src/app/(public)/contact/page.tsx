@@ -111,14 +111,32 @@ export default function ContactPage() {
                     <Icon name="map-pin" className="h-5 w-5" />
                   </span>
                   <h2 className="mt-4 font-display font-semibold text-ink-900">Visit us</h2>
-                  <address className="mt-3 space-y-1 not-italic text-sm leading-relaxed text-ink-600">
-                    {CLIENT.addressLines.map((line) => (
-                      <span key={line} className="block">
-                        {line}
-                      </span>
-                    ))}
-                  </address>
-                  <Button href={CLIENT.mapsUrl} variant="secondary" size="md" className="btn-lift mt-5">
+                  {/* The address itself opens Google Maps, not just the button
+                      below it — people reach for the words, not the control. */}
+                  <a
+                    href={CLIENT.mapsUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Open Quality Hearing Care location in Google Maps (opens in a new tab)"
+                    className="mt-3 block"
+                  >
+                    <address className="space-y-1 not-italic text-sm leading-relaxed text-ink-600 underline-offset-4 hover:text-brand-700 hover:underline">
+                      {CLIENT.addressLines.map((line) => (
+                        <span key={line} className="block">
+                          {line}
+                        </span>
+                      ))}
+                    </address>
+                  </a>
+                  <Button
+                    href={CLIENT.mapsUrl}
+                    variant="secondary"
+                    size="md"
+                    className="btn-lift mt-5"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Open Quality Hearing Care location in Google Maps (opens in a new tab)"
+                  >
                     <Icon name="map-pin" className="h-4 w-4" />
                     Get Directions
                   </Button>
