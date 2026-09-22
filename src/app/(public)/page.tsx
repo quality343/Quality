@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { Badge, Button, Container, Icon, type IconName } from "@/components/ui";
-import { ProductViewer } from "@/components/brand/ProductViewer";
 import { HearingAidDevice } from "@/components/brand/HearingAidDevice";
 import { AudiogramExplainer } from "@/components/brand/SoundWave";
 import { Reveal } from "@/components/motion/Reveal";
@@ -208,18 +207,16 @@ export default async function HomePage() {
             </dl>
           </div>
 
-          {/* Product centrepiece + overlapping portrait for human warmth. */}
+          {/* Portrait — the human centrepiece beside the headline. The
+              hearing-aid product render that used to sit here has been
+              removed, so this photograph is the hero's only visual; it keeps
+              its own proportions at every width and the sections below move
+              up to take the space the render occupied. */}
           <div className="relative animate-fade-up" style={{ animationDelay: "140ms" }}>
-            <div className="relative mx-auto h-[21rem] w-full max-w-[26rem] sm:h-[26rem] lg:h-[31rem] lg:max-w-[30rem]">
-              <ProductViewer className="h-full w-full" />
-            </div>
-
-            {/* Portrait chip — overlaps the render on large screens, sits
-                beneath it on small ones so mobile keeps a human moment. */}
-            <div className="mx-auto mt-5 w-full max-w-[26rem] lg:absolute lg:bottom-2 lg:-left-4 lg:mt-0 lg:w-40 xl:w-44">
+            <div className="mx-auto w-full max-w-[26rem]">
               <Photo
                 source={PHOTOS.heroCouple}
-                sizes="(min-width: 1024px) 11rem, (min-width: 640px) 26rem, 100vw"
+                sizes="(min-width: 640px) 26rem, 100vw"
                 className="aspect-[16/10] w-full rounded-2xl ring-1 ring-white/20 shadow-product lg:aspect-[3/4] lg:rounded-3xl"
                 scrim="bottom"
               >
