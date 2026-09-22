@@ -1,6 +1,7 @@
 const ICONS = {
   menu: "M4 6h16M4 12h16M4 18h16",
   x: "M6 6l12 12M6 18L18 6",
+  "chevron-down": "m6 9 6 6 6-6",
   "arrow-right": "M5 12h14m-6-6 6 6-6 6",
   "calendar": "M8 7V3m8 4V3M3 9h18M5 5h14a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z",
   "phone": "M4 5c0-1.1.9-2 2-2h2l2 5-2.5 1.5a12 12 0 0 0 5 5L14 12l5 2v2a2 2 0 0 1-2 2A14 14 0 0 1 4 5Z",
