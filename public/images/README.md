@@ -2,10 +2,10 @@
 
 Two kinds of image live here:
 
-1. **Clinic-supplied product renders** — `hearing-aid-gold.jpg` and
-   `hearing-aid-pair.jpg`. These are the client's own artwork, supplied
-   directly, and they are the only images here that are ours. They are product
-   renders, not photographs of a clinic.
+1. **Clinic-supplied product renders** — `hearing-aid-gold.jpg`,
+   `hearing-aid-pair.jpg` and `hearing-aid-charging-case.jpg`. These are the
+   client's own artwork, supplied directly, and they are the only images here
+   that are ours. They are product renders, not photographs of a clinic.
 2. **Placeholder stock photography** — everything else, chosen to give the site
    a finished, human feel until the clinic supplies its own photos. They are
    real photographs of real people — not AI-generated faces — because synthetic
@@ -50,10 +50,26 @@ clip goes public on the homepage. See `public/video/README.md`.
 | --- | --- | --- | --- |
 | `hearing-aid-gold.jpg` | Supplied by QUALITY Hearing Care (WhatsApp, 2026-09-22) | Owned by QUALITY Hearing Care | Poster/fallback still for the homepage device clip |
 | `hearing-aid-pair.jpg` | Supplied by QUALITY Hearing Care (WhatsApp, 2026-09-22) | Owned by QUALITY Hearing Care | Hearing-aids page hero card |
+| `hearing-aid-charging-case.jpg` | Supplied by QUALITY Hearing Care (WhatsApp, 2026-09-22) | Owned by QUALITY Hearing Care | "Types of hearing aids" — rechargeable callout |
 
-Both are JPEGs at around 1250–1340px on the long edge, so they are fine at
-the sizes used here but are **not suitable for print or large banners**. Ask the
-clinic for the original render files if a bigger size is ever needed.
+All are JPEGs at 720–1340px on the long edge, so they are fine at the sizes
+used here but are **not suitable for print or large banners**. Ask the clinic
+for the original render files if a bigger size is ever needed.
+
+The rechargeable photo is 720px wide and is displayed at roughly 500px, so it
+is only ~1.4× at a typical desktop size and will look slightly soft on a
+high-DPI screen. A wider original would fix that.
+
+### Reference images the clinic sent that are deliberately *not* published
+
+One supplied photo shows a pair of receiver-in-canal aids and their charger with
+a manufacturer's wordmark legibly printed on the device bodies, and a later
+screenshot is of a product catalogue page listing brands and prices. Neither is
+published here: this site names no manufacturer and quotes no price, and putting
+a competitor's name on the homepage or a price we cannot stand behind is not a
+call to make silently. If the clinic confirms these are brands they fit and
+those prices are current, they can be added deliberately — see `docs/` for how
+the catalogue is populated — but they need a decision from the clinic first.
 
 ## Replacing these with the clinic's own photography
 

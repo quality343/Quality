@@ -147,6 +147,19 @@ export const PHOTOS = {
     height: 1177,
     alt: "Two behind-the-ear hearing aids side by side, one silver and one gold",
   },
+
+  /**
+   * Client-supplied product photo — two compact aids docked in an open charger.
+   * Used for the rechargeable-format callout, where the point is that the
+   * devices charge in a case rather than taking batteries. It carries no
+   * legible manufacturer branding.
+   */
+  hearingAidChargingCase: {
+    src: "/images/hearing-aid-charging-case.jpg",
+    width: 720,
+    height: 557,
+    alt: "Two compact hearing aids docked in an open white charging case",
+  },
 } as const satisfies Record<string, SitePhoto>;
 
 export type PhotoKey = keyof typeof PHOTOS;
