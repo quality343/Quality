@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { BrandLogo } from "@/components/brand/BrandLogo";
 import { Button, Container, Icon } from "@/components/ui";
 import { CLIENT } from "@/lib/client-info";
@@ -14,12 +14,13 @@ import { CLIENT } from "@/lib/client-info";
  * they live under Services rather than beside it. Both keep their own routes
  * and pages — this only changes where they are listed.
  *
- * The desktop dropdown is opened by CSS (`group-hover` and `group-focus-within`),
- * not by JavaScript state, for two reasons: it keeps Services a real `<Link>`
- * (so `/services` stays a crawlable link and a working tap target), and it makes
- * the keyboard path work for free — tabbing onto Services reveals the panel, and
- * tabbing again lands on its first link, because the panel is only `invisible`
- * while nothing inside the group has focus.
+ * The desktop dropdown is stateful rather than CSS-only. Hover and focus only
+ * *set* the open panel; it is cleared on selection, on route change, on an
+ * outside click and on Escape. The earlier pure-CSS version (`group-hover` +
+ * `group-focus-within`) could not be closed on navigation: the pointer was
+ * still parked over the panel's slot and the clicked link kept focus, so the
+ * panel reappeared on the destination page. Services stays a real `<Link>`
+ * either way, so `/services` remains crawlable and a working tap target.
  */
 type NavChild = { href: string; label: string; description: string };
 type NavItem = { href: string; label: string; children?: NavChild[] };
@@ -55,6 +56,9 @@ export function SiteHeader({
   const [open, setOpen] = useState(false);
   const [openSection, setOpenSection] = useState<string | null>(null);
   const [scrolled, setScrolled] = useState(false);
+  /** Desktop Services dropdown: the href of the open panel, or none. */
+  const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const navRef = useRef<HTMLElement | null>(null);
   const pathname = usePathname();
 
   // Compact + elevate once the page moves, so the hero reads edge-to-edge.
@@ -65,11 +69,35 @@ export function SiteHeader({
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Close the drawer on navigation and lock body scroll while it is open.
+  // Close the drawer and any open dropdown on navigation and lock body scroll
+  // while it is open.
   useEffect(() => {
     setOpen(false);
     setOpenSection(null);
+    setOpenMenu(null);
   }, [pathname]);
+
+  // Dismiss the desktop dropdown when the click lands anywhere outside it, and
+  // on Escape for keyboard users.
+  useEffect(() => {
+    const onPointerDown = (event: Event) => {
+      if (!navRef.current) return;
+      if (event.target instanceof Node && navRef.current.contains(event.target)) {
+        return;
+      }
+      setOpenMenu(null);
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setOpenMenu(null);
+    };
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, []);
+
   useEffect(() => {
     if (!open) return;
     const previous = document.body.style.overflow;
@@ -102,7 +130,11 @@ export function SiteHeader({
       >
         <BrandLogo withHomeLink logoSrc={logoSrc} logoMarkSrc={logoMarkSrc} />
 
-        <nav aria-label="Primary" className="hidden items-center gap-0.5 xl:flex">
+        <nav
+          ref={navRef}
+          aria-label="Primary"
+          className="hidden items-center gap-0.5 xl:flex"
+        >
           {NAV.map((item) => {
             const active = isSectionActive(item);
 
@@ -129,8 +161,24 @@ export function SiteHeader({
               );
             }
 
+            const menuOpen = openMenu === item.href;
+            const closeIfMine = () =>
+              setOpenMenu((current) => (current === item.href ? null : current));
+
             return (
-              <div key={item.href} className="group relative">
+              <div
+                key={item.href}
+                className="group relative"
+                onMouseEnter={() => setOpenMenu(item.href)}
+                onMouseLeave={closeIfMine}
+                onFocus={() => setOpenMenu(item.href)}
+                onBlur={(event) => {
+                  // Only close once focus has left the whole trigger+panel group.
+                  if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+                    closeIfMine();
+                  }
+                }}
+              >
                 <Link
                   href={item.href}
                   aria-current={active ? "page" : undefined}
@@ -156,10 +204,15 @@ export function SiteHeader({
                 {/* `pt-2` is padding rather than a gap on purpose: it is the
                     hover bridge, so the pointer can cross the space between the
                     trigger and the panel without the menu closing. */}
-                <div className="invisible absolute left-0 top-full z-50 w-80 pt-2 opacity-0 transition-[opacity,transform] duration-200 group-hover:visible group-hover:opacity-100 group-focus-within:visible group-focus-within:opacity-100">
+                <div
+                  className={`absolute left-0 top-full z-50 w-80 pt-2 transition-[opacity,transform] duration-200 ${
+                    menuOpen ? "visible opacity-100" : "invisible opacity-0"
+                  }`}
+                >
                   <div className="rounded-2xl border border-border bg-surface p-2 shadow-lift">
                     <Link
                       href={item.href}
+                      onClick={closeIfMine}
                       className="flex items-center justify-between rounded-xl px-3 py-2.5 text-sm font-semibold text-brand-700 hover:bg-brand-50"
                     >
                       All services
@@ -170,6 +223,7 @@ export function SiteHeader({
                       <Link
                         key={child.href}
                         href={child.href}
+                        onClick={closeIfMine}
                         aria-current={isActive(child.href) ? "page" : undefined}
                         className={`block rounded-xl px-3 py-2.5 transition-colors ${
                           isActive(child.href)
@@ -268,7 +322,10 @@ export function SiteHeader({
                       >
                         <Link
                           href={item.href}
-                          onClick={() => setOpen(false)}
+                          onClick={() => {
+                            setOpen(false);
+                            setOpenSection(null);
+                          }}
                           className="flex min-h-11 items-center justify-between rounded-xl px-4 text-sm font-semibold text-brand-700 hover:bg-brand-50"
                         >
                           All services
@@ -278,7 +335,10 @@ export function SiteHeader({
                           <Link
                             key={child.href}
                             href={child.href}
-                            onClick={() => setOpen(false)}
+                            onClick={() => {
+                              setOpen(false);
+                              setOpenSection(null);
+                            }}
                             aria-current={
                               isActive(child.href) ? "page" : undefined
                             }
