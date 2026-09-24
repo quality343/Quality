@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import { LegalList, LegalNote, LegalPage, type LegalSection } from "@/components/legal/LegalPage";
-import { CLIENT } from "@/lib/client-info";
+import { CLIENT, WHATSAPP } from "@/lib/client-info";
 
 export const metadata: Metadata = {
   // `absolute` — the brief's wording, and the root layout's template would
   // otherwise append the brand a second time.
   title: { absolute: "Terms & Conditions | Quality Hearing Care" },
   description:
-    "The terms that apply when you use the Quality Hearing Care website and book an appointment with our clinic in Kukatpally, Hyderabad.",
+    "The terms that apply when you use the Quality Hearing Care website and request an appointment with our clinic in Kukatpally, Hyderabad.",
   alternates: { canonical: "/terms-and-conditions" },
 };
 
@@ -24,10 +24,10 @@ const SECTIONS: LegalSection[] = [
     content: (
       <>
         <p>
-          These terms apply to this website and to appointments you request
-          through it. They are provided by {CLIENT.name} (&ldquo;we&rdquo;,
-          &ldquo;us&rdquo;). By using the website or submitting a booking, you
-          agree to them.
+          These terms apply to this website and to enquiries and appointment
+          requests you send us. They are provided by {CLIENT.name}
+          (&ldquo;we&rdquo;, &ldquo;us&rdquo;). By using the website or getting in
+          touch with us, you agree to them.
         </p>
         <p>
           Please read them together with our{" "}
@@ -51,24 +51,25 @@ const SECTIONS: LegalSection[] = [
   },
   {
     id: "appointment-booking",
-    title: "Appointment Booking",
+    title: "Appointment Enquiries",
     content: (
       <>
         <p>
-          You can request an appointment through this website without creating
-          an account. You choose the type of appointment (a clinic visit or a
-          home consultation), the service you are interested in, and a
-          preferred date and time.
+          You can contact us through this website or on WhatsApp without
+          creating an account. Tell us whether you are asking about a clinic
+          visit or a home consultation, the service you are interested in, and
+          when it suits you.
         </p>
         <p>
-          The details you submit must be accurate and must belong to you, or to
-          the person you are booking on behalf of with their permission. If we
+          The details you send must be accurate and must belong to you, or to
+          the person you are asking on behalf of with their permission. If we
           cannot reach you on the number you provide, we may not be able to
-          hold the appointment.
+          arrange the appointment.
         </p>
         <p>
-          Availability shown on the website reflects the times currently
-          offered by the clinic and can change as other bookings are made.
+          Appointments are agreed directly with our team rather than allocated
+          automatically, because the times offered by the clinic change from day
+          to day.
         </p>
       </>
     ),
@@ -79,21 +80,21 @@ const SECTIONS: LegalSection[] = [
     content: (
       <>
         <p>
-          When you submit a booking, the website shows a confirmation screen
-          with an appointment number. That number is how you and our team can
-          refer to the booking.
+          An appointment is confirmed once our team has spoken with you and a
+          time has been agreed. Until then, an enquiry is just an enquiry —
+          nothing is held for you automatically.
         </p>
         <p>
-          A submitted request is not a medical opinion or a diagnosis. Our team
-          may contact you to confirm details, ask a question about your
-          appointment, or confirm the time.
+          An enquiry is not a medical opinion or a diagnosis. Our team may
+          contact you to confirm details, ask a question about the appointment,
+          or agree the time.
         </p>
         <LegalNote>
           <p className="text-sm leading-relaxed text-ink-600">
             We do not send automatic SMS or email messages unless a messaging
-            service is connected to the clinic&rsquo;s systems. Please keep your
-            appointment number, and contact the clinic if you are unsure whether
-            an appointment is confirmed.
+            service is connected to the clinic&rsquo;s systems. If you are
+            unsure whether an appointment is confirmed, please contact the
+            clinic.
           </p>
         </LegalNote>
       </>
@@ -109,9 +110,12 @@ const SECTIONS: LegalSection[] = [
         </p>
         <p>
           Please arrive a little before your appointment time so there is time
-          to check in. If you are running late, call us on{" "}
+          to check in. If you are running late, message us on WhatsApp on{" "}
           <a
-            href={CLIENT.phoneHref}
+            href={WHATSAPP.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Chat with Quality Hearing Care on WhatsApp (opens in a new tab)"
             className="font-semibold text-brand-700 underline-offset-4 hover:underline"
           >
             {CLIENT.phone}
@@ -132,14 +136,14 @@ const SECTIONS: LegalSection[] = [
       <>
         <p>
           Home consultation is available from the clinic. To arrange a visit,
-          choose &ldquo;Home Consultation&rdquo; while booking and provide the
-          address and locality where the visit is needed, along with any
-          instructions that would help our team (for example, floor or lift
-          access).
+          tell us on WhatsApp or by phone that you would like a home
+          consultation, and provide the address and locality where the visit is
+          needed, along with any instructions that would help our team (for
+          example, floor or lift access).
         </p>
         <p>
           Home visit requests are reviewed by our team and are subject to
-          availability and confirmation. Submitting a request does not by itself
+          availability and confirmation. Asking for a visit does not by itself
           guarantee a visit at the requested time. Our team will contact you to
           confirm.
         </p>
@@ -158,15 +162,9 @@ const SECTIONS: LegalSection[] = [
       <>
         <p>
           If your plans change, please contact the clinic as early as you can so
-          the time can be offered to someone else. You can also look up a
-          booking you have made using your appointment number on our{" "}
-          <a
-            href="/booking-lookup"
-            className="font-semibold text-brand-700 underline-offset-4 hover:underline"
-          >
-            booking lookup
-          </a>{" "}
-          page.
+          the time can be offered to someone else. Message or call us with the
+          name and number the appointment was arranged under and we will change
+          it or cancel it for you.
         </p>
         <p>
           We may need to reschedule or cancel an appointment — for example if a
@@ -199,9 +197,9 @@ const SECTIONS: LegalSection[] = [
           ]}
         />
         <p>
-          We may decline or cancel a booking where information given is
-          misleading, where a booking appears to be automated or abusive, or
-          where the request cannot be safely accommodated.
+          We may decline or cancel an appointment where information given is
+          misleading, where a request appears to be automated or abusive, or
+          where it cannot be safely accommodated.
         </p>
       </>
     ),
@@ -213,7 +211,7 @@ const SECTIONS: LegalSection[] = [
       <>
         <p>
           This website and its content are provided for information and
-          appointment booking. Please do not attempt to interfere with it,
+          appointment enquiries. Please do not attempt to interfere with it,
           access areas that are not intended for public use, copy content for
           another business, or submit automated requests.
         </p>
@@ -282,10 +280,22 @@ const SECTIONS: LegalSection[] = [
       <>
         <p>
           If anything here is unclear, please contact us. We are happy to
-          explain how the clinic works before you book.
+          explain how the clinic works before you get in touch.
         </p>
         <LegalList
           items={[
+            <>
+              WhatsApp:{" "}
+              <a
+                href={WHATSAPP.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Chat with Quality Hearing Care on WhatsApp (opens in a new tab)"
+                className="font-semibold text-brand-700 underline-offset-4 hover:underline"
+              >
+                {CLIENT.phone}
+              </a>
+            </>,
             <>
               Phone:{" "}
               <a
@@ -330,7 +340,7 @@ export default function TermsAndConditionsPage() {
     <LegalPage
       eyebrow="Policies"
       title="Terms & Conditions"
-      description="How this website and our appointment booking work, and what you can expect from us."
+      description="How this website and our appointment enquiries work, and what you can expect from us."
       lastUpdated="22 September 2026"
       sections={SECTIONS}
     />

@@ -1,8 +1,15 @@
 import Link from "next/link";
 import { BrandLogo } from "@/components/brand/BrandLogo";
-import { CLIENT } from "@/lib/client-info";
+import { SocialIcon, SocialLinks } from "@/components/brand/SocialIcons";
+import { CLIENT, FACEBOOK_PAGES, WHATSAPP } from "@/lib/client-info";
 import { Container, Icon } from "@/components/ui";
 
+/**
+ * The booking engine is gone, so the footer's job is contact, not conversion:
+ * every route to the clinic — WhatsApp, phone, email, map, social — is here and
+ * each one says out loud what it does. Which matters, because this is the
+ * surface older visitors scroll to when they cannot find a button.
+ */
 const SECTIONS: { title: string; links: { href: string; label: string }[] }[] = [
   {
     title: "Explore",
@@ -11,23 +18,9 @@ const SECTIONS: { title: string; links: { href: string; label: string }[] }[] = 
       { href: "/about", label: "About Us" },
       { href: "/services", label: "Services" },
       { href: "/hearing-tests", label: "Hearing Tests" },
-    ],
-  },
-  {
-    title: "Clinic",
-    links: [
       { href: "/hearing-aids", label: "Hearing Aids" },
-      { href: "/branches", label: "Branches" },
-      { href: "/blog", label: "Blog" },
+      { href: "/home-consultation", label: "Home Consultation" },
       { href: "/contact", label: "Contact" },
-    ],
-  },
-  {
-    title: "Appointments",
-    links: [
-      { href: "/book-appointment", label: "Book an Appointment" },
-      { href: "/book-appointment?type=HOME_CONSULTATION", label: "Home Consultation" },
-      { href: "/booking-lookup", label: "Find My Booking" },
     ],
   },
   {
@@ -49,14 +42,32 @@ export function SiteFooter({
 }) {
   return (
     <footer className="bg-brand-950 text-white">
-      <Container className="grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-6">
-        <div className="sm:col-span-2 lg:col-span-2">
+      <Container className="grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-5">
+        <div className="sm:col-span-2">
           <BrandLogo inverted logoSrc={logoSrc} logoMarkSrc={logoMarkSrc} />
           <p className="mt-4 max-w-xs text-sm leading-relaxed text-brand-100/80">
             Professional hearing care in Kukatpally, Hyderabad — hearing tests,
             hearing aids, and home consultations.
           </p>
+
           <ul className="mt-5 space-y-2.5 text-sm text-brand-100/80">
+            <li className="flex items-start gap-2">
+              <SocialIcon id="whatsapp" className="mt-0.5 h-4 w-4 shrink-0" />
+              <span>
+                <a
+                  href={WHATSAPP.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`Chat with ${CLIENT.name} on WhatsApp (opens in a new tab)`}
+                  className="font-semibold text-white underline-offset-4 hover:underline"
+                >
+                  {CLIENT.phone}
+                </a>
+                <span className="block text-xs text-brand-100/60">
+                  WhatsApp — usually the quickest reply
+                </span>
+              </span>
+            </li>
             <li className="flex items-start gap-2">
               <Icon name="phone" className="mt-0.5 h-4 w-4 shrink-0" />
               <a
@@ -64,7 +75,7 @@ export function SiteFooter({
                 aria-label="Call Quality Hearing Care"
                 className="hover:text-white"
               >
-                {CLIENT.phone}
+                Call {CLIENT.phone}
               </a>
             </li>
             <li className="flex items-start gap-2">
@@ -134,6 +145,39 @@ export function SiteFooter({
             </ul>
           </nav>
         ))}
+
+        {/* "Stay Connected" lives in the footer so every page carries the same
+            official accounts — one place to verify, never duplicated per page. */}
+        <section aria-labelledby="stay-connected">
+          <h2
+            id="stay-connected"
+            className="text-sm font-semibold uppercase tracking-wider text-brand-200"
+          >
+            Stay Connected
+          </h2>
+          <p className="mt-3 text-sm leading-relaxed text-brand-100/70">
+            Follow {CLIENT.name} for hearing-care tips, clinic updates and
+            appointment information.
+          </p>
+          <SocialLinks className="mt-4 gap-2" />
+          {/* The manager supplied a second Facebook page. It is listed
+              separately rather than as a duplicate glyph in the row above. */}
+          <ul className="mt-3 space-y-0.5">
+            {FACEBOOK_PAGES.slice(1).map((page) => (
+              <li key={page.href}>
+                <a
+                  href={page.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`${page.label} (opens in a new tab)`}
+                  className="block py-2 text-sm text-brand-100/70 underline-offset-4 transition-colors hover:text-white hover:underline"
+                >
+                  {page.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
       </Container>
 
       <div className="border-t border-white/10">
@@ -141,7 +185,27 @@ export function SiteFooter({
           <p>
             © {new Date().getFullYear()} {CLIENT.name} · {CLIENT.tagline}. All rights reserved.
           </p>
-          <p>Home consultation available — book online or call.</p>
+          <p>
+            Home consultation available —{" "}
+            <a
+              href={WHATSAPP.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label={`Chat with ${CLIENT.name} on WhatsApp (opens in a new tab)`}
+              className="font-semibold text-brand-100 underline-offset-4 hover:text-white hover:underline"
+            >
+              message us on WhatsApp
+            </a>{" "}
+            or{" "}
+            <a
+              href={CLIENT.phoneHref}
+              aria-label="Call Quality Hearing Care"
+              className="font-semibold text-brand-100 underline-offset-4 hover:text-white hover:underline"
+            >
+              call {CLIENT.phone}
+            </a>
+            .
+          </p>
         </Container>
       </div>
     </footer>

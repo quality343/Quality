@@ -2,7 +2,7 @@ import { Button, Container, Icon } from "@/components/ui";
 import { PageHero } from "@/components/layout/PageHero";
 import { PHOTOS } from "@/lib/images";
 import { Reveal } from "@/components/motion/Reveal";
-import { CLIENT } from "@/lib/client-info";
+import { CLIENT, homeConsultationHref, WHATSAPP } from "@/lib/client-info";
 
 export const metadata = {
   title: "Hearing Health Blog — QUALITY Hearing Care, Hyderabad",
@@ -64,9 +64,13 @@ export default function BlogPage() {
                   stand behind.
                 </p>
                 <p className="mt-3 text-sm leading-relaxed text-ink-500">
-                  In the meantime, questions are welcome. Call{" "}
+                  In the meantime, questions are welcome. Message us on WhatsApp
+                  on{" "}
                   <a
-                    href={CLIENT.phoneHref}
+                    href={WHATSAPP.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Chat with Quality Hearing Care on WhatsApp (opens in a new tab)"
                     className="font-semibold text-brand-700 hover:text-brand-800"
                   >
                     {CLIENT.phone}
@@ -74,9 +78,14 @@ export default function BlogPage() {
                   and we&apos;ll answer directly.
                 </p>
                 <div className="mt-7 flex flex-col gap-3 sm:flex-row">
-                  <Button href="/book-appointment" size="md" className="btn-lift">
-                    <Icon name="calendar" className="h-4 w-4" />
-                    Book an Appointment
+                  <Button
+                    href={homeConsultationHref}
+                    size="md"
+                    className="btn-lift"
+                    aria-label="Request a home consultation on WhatsApp (opens in a new tab)"
+                  >
+                    <Icon name="home" className="h-4 w-4" />
+                    Request Home Consultation
                   </Button>
                   <Button href="/contact" variant="secondary" size="md" className="btn-lift">
                     Send a message

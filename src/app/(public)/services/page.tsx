@@ -1,10 +1,16 @@
 import Link from "next/link";
 import { Button, Container, Icon, type IconName } from "@/components/ui";
 import { PageHero } from "@/components/layout/PageHero";
+import { SocialIcon } from "@/components/brand/SocialIcons";
 import { PHOTOS } from "@/lib/images";
 import { Reveal } from "@/components/motion/Reveal";
 import { listServices } from "@/server/services/queries";
-import { CLIENT } from "@/lib/client-info";
+import {
+  CLIENT,
+  homeConsultationHref,
+  WHATSAPP,
+  whatsappEnquiry,
+} from "@/lib/client-info";
 
 export const metadata = {
   title: "Hearing Services in Kukatpally, Hyderabad — QUALITY Hearing Care",
@@ -47,12 +53,13 @@ export default async function ServicesPage() {
         actions={
           <>
             <Button
-              href="/book-appointment"
+              href={homeConsultationHref}
               size="lg"
               className="btn-lift !bg-white !text-brand-800 hover:!bg-brand-50"
+              aria-label="Request a home consultation on WhatsApp (opens in a new tab)"
             >
-              <Icon name="calendar" className="h-5 w-5" />
-              Book an Appointment
+              <Icon name="home" className="h-5 w-5" />
+              Request Home Consultation
             </Button>
             <Button
               href="/hearing-tests"
@@ -78,9 +85,12 @@ export default async function ServicesPage() {
                   Our service list is being finalised
                 </h2>
                 <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-ink-500">
-                  Call us on{" "}
+                  Message us on WhatsApp on{" "}
                   <a
-                    href={CLIENT.phoneHref}
+                    href={WHATSAPP.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Chat with Quality Hearing Care on WhatsApp (opens in a new tab)"
                     className="font-semibold text-brand-700 hover:text-brand-800"
                   >
                     {CLIENT.phone}
@@ -112,12 +122,13 @@ export default async function ServicesPage() {
                         ) : null}
                         <div className="mt-7 flex flex-col gap-3 sm:flex-row">
                           <Button
-                            href={`/book-appointment?service=${services[0].id}`}
+                            href={whatsappEnquiry(services[0].name)}
                             size="lg"
                             className="btn-lift !bg-white !text-brand-800 hover:!bg-brand-50"
+                            aria-label={`Ask about ${services[0].name} on WhatsApp (opens in a new tab)`}
                           >
-                            <Icon name="calendar" className="h-5 w-5" />
-                            Book This Service
+                            <SocialIcon id="whatsapp" className="h-5 w-5" />
+                            Ask about this service
                           </Button>
                           <Button
                             href={`/services/${services[0].code.toLowerCase()}`}
@@ -185,11 +196,12 @@ export default async function ServicesPage() {
                       </p>
                       <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-border pt-5">
                         <Button
-                          href={`/book-appointment?service=${service.id}`}
+                          href={whatsappEnquiry(service.name)}
                           size="sm"
                           className="btn-lift"
+                          aria-label={`Ask about ${service.name} on WhatsApp (opens in a new tab)`}
                         >
-                          Book
+                          Ask on WhatsApp
                         </Button>
                         <Link
                           href={`/services/${service.code.toLowerCase()}`}
@@ -219,15 +231,20 @@ export default async function ServicesPage() {
                     Not sure where to start?
                   </h2>
                   <p className="mt-3 max-w-xl text-sm leading-relaxed text-ink-600">
-                    Most people begin with a hearing assessment. Book one online
-                    and our team will guide you from there — no account needed,
-                    and no obligation.
+                    Most people begin with a hearing assessment. Ask us about
+                    one and our team will guide you from there — no account
+                    needed, and no obligation.
                   </p>
                 </div>
                 <div className="flex flex-col gap-3 sm:flex-row lg:flex-col">
-                  <Button href="/book-appointment" size="lg" className="btn-lift">
-                    <Icon name="calendar" className="h-5 w-5" />
-                    Book an Appointment
+                  <Button
+                    href={homeConsultationHref}
+                    size="lg"
+                    className="btn-lift"
+                    aria-label="Request a home consultation on WhatsApp (opens in a new tab)"
+                  >
+                    <Icon name="home" className="h-5 w-5" />
+                    Request Home Consultation
                   </Button>
                   <Button href={CLIENT.phoneHref} variant="secondary" size="lg" className="btn-lift">
                     <Icon name="phone" className="h-5 w-5" />

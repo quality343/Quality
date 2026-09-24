@@ -1,13 +1,13 @@
 import { notFound } from "next/navigation";
-import Link from "next/link";
 import { Button, Container, Icon } from "@/components/ui";
 import { PageHero } from "@/components/layout/PageHero";
+import { SocialIcon } from "@/components/brand/SocialIcons";
 import { PHOTOS } from "@/lib/images";
 import { Reveal } from "@/components/motion/Reveal";
 import { VideoSection } from "@/components/media/VideoSection";
 import { SERVICE_VIDEOS } from "@/lib/media";
 import { prisma } from "@/server/db/prisma";
-import { CLIENT } from "@/lib/client-info";
+import { CLIENT, homeConsultationHref, whatsappEnquiry } from "@/lib/client-info";
 
 type Params = Promise<{ slug: string }>;
 
@@ -54,12 +54,13 @@ export default async function ServiceDetailPage({ params }: { params: Params }) 
         actions={
           <>
             <Button
-              href={`/book-appointment?service=${service.id}`}
+              href={whatsappEnquiry(service.name)}
               size="lg"
               className="btn-lift !bg-white !text-brand-800 hover:!bg-brand-50"
+              aria-label={`Ask about ${service.name} on WhatsApp (opens in a new tab)`}
             >
-              <Icon name="calendar" className="h-5 w-5" />
-              Book This Service
+              <SocialIcon id="whatsapp" className="h-5 w-5" />
+              Ask about this service
             </Button>
             <Button
               href="/services"
@@ -91,9 +92,9 @@ export default async function ServiceDetailPage({ params }: { params: Params }) 
                 </dd>
               </div>
               <div className="border-t border-white/10 pt-5">
-                <dt className="text-xs uppercase tracking-[0.16em] text-brand-200">Booking</dt>
+                <dt className="text-xs uppercase tracking-[0.16em] text-brand-200">Getting in touch</dt>
                 <dd className="mt-1 text-sm leading-relaxed text-brand-100/90">
-                  Online in about a minute — no account required.
+                  One WhatsApp message or one call — no account required.
                 </dd>
               </div>
             </dl>
@@ -150,20 +151,20 @@ export default async function ServiceDetailPage({ params }: { params: Params }) 
               <div className="space-y-6">
                 <div className="rounded-3xl border border-border bg-surface p-8 shadow-card">
                   <h2 className="font-display text-lg font-semibold text-ink-900">
-                    Book this service
+                    Ask about this service
                   </h2>
                   <p className="mt-2 text-sm leading-relaxed text-ink-500">
-                    Pick a date and time that suits you at our Kukatpally
-                    clinic. You&apos;ll get an appointment reference to manage
-                    your booking.
+                    Message us on WhatsApp or call the clinic, and our team will
+                    agree a time with you at our Kukatpally clinic.
                   </p>
                   <Button
-                    href={`/book-appointment?service=${service.id}`}
+                    href={whatsappEnquiry(service.name)}
                     size="lg"
                     className="btn-lift mt-5 w-full"
+                    aria-label={`Ask about ${service.name} on WhatsApp (opens in a new tab)`}
                   >
-                    <Icon name="calendar" className="h-5 w-5" />
-                    Book This Service
+                    <SocialIcon id="whatsapp" className="h-5 w-5" />
+                    Ask about this service
                   </Button>
                   <a
                     href={CLIENT.phoneHref}
@@ -185,13 +186,16 @@ export default async function ServiceDetailPage({ params }: { params: Params }) 
                     Home consultation is available in Hyderabad on request. Our
                     team will contact you to confirm a suitable time.
                   </p>
-                  <Link
-                    href="/book-appointment?type=HOME_CONSULTATION"
+                  <a
+                    href={homeConsultationHref}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Request a home consultation on WhatsApp (opens in a new tab)"
                     className="mt-4 inline-flex items-center gap-1.5 text-sm font-semibold text-accent-700 hover:text-accent-800"
                   >
                     Request a home visit
                     <Icon name="arrow-right" className="h-4 w-4" />
-                  </Link>
+                  </a>
                 </div>
               </div>
             </Reveal>

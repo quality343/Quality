@@ -4,7 +4,8 @@ import { PHOTOS } from "@/lib/images";
 import { SoundBars } from "@/components/brand/SoundWave";
 import { Reveal } from "@/components/motion/Reveal";
 import { TestimonialVideos } from "@/components/media/TestimonialVideos";
-import { CLIENT } from "@/lib/client-info";
+import { CLIENT, homeConsultationHref, WHATSAPP } from "@/lib/client-info";
+import { SocialIcon } from "@/components/brand/SocialIcons";
 
 export const metadata = {
   title: "About Us — QUALITY Hearing Care, Kukatpally, Hyderabad",
@@ -52,12 +53,13 @@ export default function AboutPage() {
         actions={
           <>
             <Button
-              href="/book-appointment"
+              href={homeConsultationHref}
               size="lg"
               className="btn-lift !bg-white !text-brand-800 hover:!bg-brand-50"
+              aria-label="Request a home consultation on WhatsApp (opens in a new tab)"
             >
-              <Icon name="calendar" className="h-5 w-5" />
-              Book an Appointment
+              <Icon name="home" className="h-5 w-5" />
+              Request Home Consultation
             </Button>
             <Button
               href="/services"
@@ -99,7 +101,7 @@ export default function AboutPage() {
                 Hearing loss rarely announces itself. It creeps in — you ask
                 people to repeat themselves, the television gets louder, group
                 conversations start to feel like hard work. By the time someone
-                books a test, they&apos;ve often been living with it for years.
+                asks for a test, they&apos;ve often been living with it for years.
               </p>
               <p>
                 So we don&apos;t rush the appointment. We test properly, on
@@ -197,15 +199,27 @@ export default function AboutPage() {
                 </span>
                 <h3 className="mt-5 font-display font-semibold text-ink-900">Talk to us</h3>
                 <p className="mt-3 flex-1 text-sm leading-relaxed text-ink-600">
-                  The quickest way to get an answer is to call. For anything
-                  non-urgent, email works too — we reply as soon as we can.
+                  The quickest way to get an answer is a WhatsApp message. For
+                  anything non-urgent, email works too — we reply as soon as we
+                  can.
                 </p>
                 <div className="mt-4 space-y-2 text-sm font-semibold">
                   <a
+                    href={WHATSAPP.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Chat with Quality Hearing Care on WhatsApp (opens in a new tab)"
+                    className="flex items-center gap-2 text-brand-700 hover:text-brand-800"
+                  >
+                    <SocialIcon id="whatsapp" className="h-4 w-4 shrink-0" />
+                    {CLIENT.phone}
+                  </a>
+                  <a
                     href={CLIENT.phoneHref}
+                    aria-label="Call Quality Hearing Care"
                     className="block text-brand-700 hover:text-brand-800"
                   >
-                    {CLIENT.phone}
+                    Call {CLIENT.phone}
                   </a>
                   <a
                     href={`mailto:${CLIENT.email}`}
@@ -226,17 +240,18 @@ export default function AboutPage() {
                   Home consultations
                 </h3>
                 <p className="mt-3 flex-1 text-sm leading-relaxed text-ink-600">
-                  Available in Hyderabad on request. Book online and our team
-                  will contact you to arrange a suitable time — subject to
-                  availability.
+                  Available in Hyderabad on request. Message us on WhatsApp
+                  and our team will contact you to arrange a suitable time —
+                  subject to availability.
                 </p>
                 <Button
-                  href="/book-appointment?type=HOME_CONSULTATION"
+                  href={homeConsultationHref}
                   variant="accent"
                   size="sm"
                   className="btn-lift mt-4 self-start"
+                  aria-label="Request a home consultation on WhatsApp (opens in a new tab)"
                 >
-                  Book Home Consultation
+                  Request Home Consultation
                 </Button>
               </div>
             </Reveal>

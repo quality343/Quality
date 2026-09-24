@@ -1,4 +1,5 @@
 import { PHOTOS, type SitePhoto } from "@/lib/images";
+import { homeConsultationHref, whatsappEnquiry } from "@/lib/client-info";
 
 /**
  * Video registry — the single source of truth for every video on the public
@@ -209,7 +210,7 @@ export const VIDEO = {
     poster: PHOTOS.consultationDoctor,
     aspect: "video",
     /* No `duration`: the clip does not exist yet, so its length is not known. */
-    cta: { href: "/book-appointment", label: "Book a Hearing Test" },
+    cta: { href: whatsappEnquiry("a hearing test"), label: "Ask about a hearing test" },
     secondaryCta: { href: "/hearing-tests", label: "Which test do I need?" },
     footageNote:
       "Stock footage of a consultation, used illustratively. It was not filmed at our clinic, and these are not our patients.",
@@ -264,7 +265,7 @@ export const VIDEO = {
     poster: PHOTOS.hearingAidDetail,
     aspect: "video",
     cta: { href: "/hearing-aids", label: "Explore Hearing Aids" },
-    secondaryCta: { href: "/book-appointment", label: "Book a Hearing-Aid Consultation" },
+    secondaryCta: { href: whatsappEnquiry("hearing aids"), label: "Ask about hearing aids" },
     footageNote:
       "Stock footage of a close-up of an ear. It shows no specific product, and devices are never recommended online — suitability is decided after your hearing assessment.",
     clip: { kind: "file", src: "/video/ear-close-up.mp4" },
@@ -293,8 +294,8 @@ export const VIDEO = {
     poster: PHOTOS.homeCare,
     aspect: "video",
     cta: {
-      href: "/book-appointment?type=HOME_CONSULTATION",
-      label: "Book Home Consultation",
+      href: homeConsultationHref,
+      label: "Request Home Consultation",
     },
     secondaryCta: { href: "/home-consultation", label: "How it works" },
     footageNote:
@@ -318,15 +319,15 @@ export const VIDEO = {
     eyebrow: "Take the first step",
     title: "What are you waiting for?",
     description:
-      "Take the first step toward better hearing. A single appointment tells you where you stand — and you do not need an account to book one.",
+      "Take the first step toward better hearing. One message or one call is all it takes to arrange an appointment — and you never need an account.",
     /* Matches the full-bleed band the homepage already uses for this section,
        so the slot and the page cannot drift apart. */
     poster: PHOTOS.lifestyleListening,
     aspect: "wide",
-    cta: { href: "/book-appointment", label: "Book an Appointment" },
+    cta: { href: homeConsultationHref, label: "Request Home Consultation" },
     secondaryCta: {
-      href: "/book-appointment?type=HOME_CONSULTATION",
-      label: "Home Consultation",
+      href: "/home-consultation",
+      label: "How it works",
     },
     footageNote: "Stock footage, used illustratively. They are not our patients.",
     clip: { kind: "file", src: "/video/couple-in-park.mp4" },

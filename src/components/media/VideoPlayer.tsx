@@ -10,7 +10,7 @@ import { VIDEO_ASPECT, type VideoAspect, type VideoSource, type VttTrack } from 
  *
  * A *facade*: the visitor sees the poster still and a large play button, and not
  * one byte of video is requested until they press it. That is what keeps several
- * video sections from wrecking the load time of a site whose real job is booking
+ * video sections from wrecking the load time of a site whose real job is contact
  * appointments — a page of four autoplaying players would be a slow, noisy mess.
  *
  * Autoplaying *background* video is a different job with different rules (no

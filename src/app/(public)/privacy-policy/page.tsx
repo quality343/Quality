@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import { LegalList, LegalNote, LegalPage, type LegalSection } from "@/components/legal/LegalPage";
-import { CLIENT } from "@/lib/client-info";
+import { CLIENT, WHATSAPP } from "@/lib/client-info";
 
 export const metadata: Metadata = {
   // `absolute` — matches the brief exactly, avoiding the root template's
   // second brand stamp.
   title: { absolute: "Privacy Policy | Quality Hearing Care" },
   description:
-    "What information Quality Hearing Care collects when you use this website or book an appointment, how it is used, and how it is protected.",
+    "What information Quality Hearing Care collects when you use this website or send us an appointment request, how it is used, and how it is protected.",
   alternates: { canonical: "/privacy-policy" },
 };
 
@@ -26,8 +26,8 @@ const SECTIONS: LegalSection[] = [
         <p>
           This policy explains what information {CLIENT.name} collects through
           this website, why we collect it, and how it is handled. It covers
-          appointment bookings, home consultation requests and messages sent
-          through our contact form.
+          appointment requests, home consultation requests and messages sent
+          through our contact form or WhatsApp.
         </p>
         <p>
           We keep this page in step with how the website actually works. If our
@@ -50,14 +50,13 @@ const SECTIONS: LegalSection[] = [
           items={[
             "Details you type into a form — such as your name, mobile number, email address and any message or instructions you provide.",
             "For a home consultation: the address and locality where the visit is needed, and any access instructions you choose to add.",
-            "For a booking: the appointment type (clinic visit or home consultation), the service selected, and the date and time you chose.",
+            "For an appointment request: whether it is for a clinic visit or a home consultation, the service or test you are asking about, and the day and time that suit you.",
           ]}
         />
         <p>
-          You can also choose to book without telling us anything beyond what
-          the form requires. We do not ask for payment card details on this
-          website, and we do not collect health records through the public
-          website.
+          You only ever need to tell us what the enquiry requires. We do not ask
+          for payment card details on this website, and we do not collect health
+          records through the public website.
         </p>
       </>
     ),
@@ -68,16 +67,16 @@ const SECTIONS: LegalSection[] = [
     content: (
       <>
         <p>
-          When you submit a booking, we store the appointment in our clinic
-          database along with an appointment number. That record is what our
-          team works from when they confirm, reschedule or complete your
-          appointment.
+          When you send us an appointment or home-consultation request, our team
+          records it in the clinic&rsquo;s own appointment system so we can
+          confirm a time, reschedule it or complete it. That record is internal
+          to the clinic.
         </p>
         <p>
-          You can look up an appointment you have made using your appointment
-          number and the contact details you booked with. We ask for both, so an
-          appointment cannot be opened by someone who only guesses the number.
-          Please keep your appointment number private for that reason.
+          This website does not publish appointments and does not offer a
+          lookup tool — there is no public page where an appointment can be
+          opened. If you want to know what we hold about an appointment, contact
+          the clinic and our team will help you.
         </p>
       </>
     ),
@@ -94,10 +93,12 @@ const SECTIONS: LegalSection[] = [
           website.
         </p>
         <p>
-          You can always reach us directly instead, on{" "}
+          You can always reach us directly instead — message us on WhatsApp on{" "}
           <a
-            href={CLIENT.phoneHref}
-            aria-label="Call Quality Hearing Care"
+            href={WHATSAPP.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Chat with Quality Hearing Care on WhatsApp (opens in a new tab)"
             className="font-semibold text-brand-700 underline-offset-4 hover:underline"
           >
             {CLIENT.phone}
@@ -123,11 +124,11 @@ const SECTIONS: LegalSection[] = [
         <p>Information you submit is used to:</p>
         <LegalList
           items={[
-            "Create, confirm and manage your appointment or home visit request.",
+            "Arrange, confirm and manage your appointment or home visit request.",
             "Contact you about that appointment — for example to confirm a time or ask for clarification.",
             "Respond to an enquiry you have sent us.",
             "Keep the clinic's internal record of appointments.",
-            "Keep the website and booking system working safely and prevent misuse.",
+            "Keep the website and our appointment records working safely and prevent misuse.",
           ]}
         />
         <p>
@@ -195,7 +196,7 @@ const SECTIONS: LegalSection[] = [
           cookies. Cookies are used only where they are needed for the site to
           function — for example to keep a signed-in clinic staff member signed
           in to the admin area. A visitor browsing the public website does not
-          need to sign in, and no account is created for booking an appointment.
+          need to sign in, and no account is created when you contact us.
         </p>
         <p>
           If analytics were added later, this policy would be updated to say so
@@ -274,9 +275,9 @@ const SECTIONS: LegalSection[] = [
     content: (
       <>
         <p>
-          You choose what you tell us. Booking an appointment only requires the
+          You choose what you tell us. An appointment request only requires the
           details needed to arrange it, and you can call or email the clinic
-          instead of using an online form if you prefer.
+          instead of using the website if you prefer.
         </p>
         <p>
           To ask about the information we hold, or to raise a concern about how
@@ -303,6 +304,18 @@ const SECTIONS: LegalSection[] = [
     content: (
       <LegalList
         items={[
+          <>
+            WhatsApp:{" "}
+            <a
+              href={WHATSAPP.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Chat with Quality Hearing Care on WhatsApp (opens in a new tab)"
+              className="font-semibold text-brand-700 underline-offset-4 hover:underline"
+            >
+              {CLIENT.phone}
+            </a>
+          </>,
           <>
             Phone:{" "}
             <a
@@ -346,7 +359,7 @@ export default function PrivacyPolicyPage() {
     <LegalPage
       eyebrow="Policies"
       title="Privacy Policy"
-      description="What we collect when you book or contact us, how appointment information is used, and how it is protected."
+      description="What we collect when you contact us or send an appointment request, how that information is used, and how it is protected."
       lastUpdated="22 September 2026"
       sections={SECTIONS}
     />

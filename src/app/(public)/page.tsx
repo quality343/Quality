@@ -9,7 +9,13 @@ import { DeviceClip } from "@/components/media/DeviceClip";
 import { VideoSection } from "@/components/media/VideoSection";
 import { VIDEO } from "@/lib/media";
 import { HearingSelfCheck } from "@/components/hearing/HearingSelfCheck";
-import { CLIENT } from "@/lib/client-info";
+import { SocialIcon } from "@/components/brand/SocialIcons";
+import {
+  CLIENT,
+  homeConsultationHref,
+  WHATSAPP,
+  whatsappEnquiry,
+} from "@/lib/client-info";
 import { PHOTOS } from "@/lib/images";
 import { deviceTypeLabel } from "@/lib/hearing-aids";
 import { listBranches, listServices } from "@/server/services/queries";
@@ -18,12 +24,12 @@ import { prisma } from "@/server/db/prisma";
 export const metadata = {
   title: "QUALITY Hearing Care — Hearing Clinic in Kukatpally, Hyderabad",
   description:
-    "Hearing tests, hearing aids and home consultations at QUALITY Hearing Care, KPHB Phase 1, Kukatpally, Hyderabad. Book an appointment online — no account needed.",
+    "Hearing tests, hearing aids and home consultations at QUALITY Hearing Care, KPHB Phase 1, Kukatpally, Hyderabad. Request a home consultation on WhatsApp or call 9966111188.",
   alternates: { canonical: "/" },
   openGraph: {
     title: "QUALITY Hearing Care — JOY OF HEARING",
     description:
-      "Professional hearing care in Kukatpally, Hyderabad: hearing tests, hearing aids, and home consultations. Book online.",
+      "Professional hearing care in Kukatpally, Hyderabad: hearing tests, hearing aids, and home consultations. Message us on WhatsApp.",
     type: "website",
   },
 };
@@ -51,7 +57,7 @@ const TRUST: { icon: IconName; title: string; text: string }[] = [
   {
     icon: "calendar",
     title: "Convenient appointments",
-    text: "Book online in about a minute at our Kukatpally clinic — or request a home visit.",
+    text: "A clinic visit at Kukatpally or a home visit — arranged with one message or one call.",
   },
 ];
 
@@ -72,9 +78,9 @@ const HOME_STYLES: { name: string; text: string }[] = [
 
 const PROCESS: { title: string; text: string; icon: IconName }[] = [
   {
-    icon: "calendar",
-    title: "Book online",
-    text: "Choose a clinic visit or a home consultation and pick a time that suits you. No account needed.",
+    icon: "chat",
+    title: "Message us",
+    text: "Send one WhatsApp message telling us what you need — a clinic visit or a home consultation. No account needed.",
   },
   {
     icon: "ear",
@@ -95,16 +101,16 @@ const PROCESS: { title: string; text: string; icon: IconName }[] = [
 
 const FAQS: { q: string; a: string }[] = [
   {
-    q: "Do I need an account to book?",
-    a: "No. Booking takes about a minute and needs only your name and mobile number, plus an email if you'd like one. You'll receive a booking reference you can use any time to view or cancel your appointment.",
+    q: "Do I need an account to get in touch?",
+    a: "No. There is no account and no login. Send us a WhatsApp message or call the clinic with your name and what you need, and our team will agree a time with you.",
   },
   {
     q: "How long does a hearing test take?",
-    a: "Most hearing assessments take 30–45 minutes, including time to talk through your results. The exact duration is shown for each service when you book.",
+    a: "Most hearing assessments take 30–45 minutes, including time to talk through your results. The expected duration is shown on each service page.",
   },
   {
     q: "Do you offer home visits?",
-    a: "Yes — home consultation is available in Hyderabad, subject to availability. Request one online and our team will contact you to arrange a suitable time.",
+    a: "Yes — home consultation is available in Hyderabad, subject to availability. Send us a message and our team will contact you to arrange a suitable time.",
   },
   {
     q: "Will I have to buy a hearing aid?",
@@ -169,12 +175,15 @@ export default async function HomePage() {
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
               <Button
-                href="/book-appointment"
+                href={homeConsultationHref}
                 size="lg"
                 className="btn-lift !bg-white !text-brand-800 hover:!bg-brand-50"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Request a home consultation on WhatsApp (opens in a new tab)"
               >
-                <Icon name="calendar" className="h-5 w-5" />
-                Book an Appointment
+                <Icon name="home" className="h-5 w-5" />
+                Request Home Consultation
               </Button>
               <Button
                 href="/hearing-aids"
@@ -189,11 +198,15 @@ export default async function HomePage() {
 
             <dl className="mt-9 flex flex-wrap items-center gap-x-7 gap-y-3 text-sm text-brand-100/85">
               <div className="flex items-center gap-2.5">
-                <Icon name="phone" className="h-4 w-4 text-brand-200" />
-                <dt className="sr-only">Phone</dt>
+                {/* WhatsApp glyph, not a phone: the number opens the chat. */}
+                <SocialIcon id="whatsapp" className="h-4 w-4 text-brand-200" />
+                <dt className="sr-only">WhatsApp</dt>
                 <dd>
                   <a
-                    href={CLIENT.phoneHref}
+                    href={WHATSAPP.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`Chat with ${CLIENT.name} on WhatsApp (opens in a new tab)`}
                     className="font-semibold text-white underline-offset-4 hover:underline"
                   >
                     {CLIENT.phone}
@@ -282,12 +295,15 @@ export default async function HomePage() {
                     </p>
                     <div className="mt-7 flex flex-col gap-3 sm:flex-row">
                       <Button
-                        href="/book-appointment"
+                        href={whatsappEnquiry("a hearing test")}
                         size="lg"
                         className="btn-lift !bg-white !text-brand-800 hover:!bg-brand-50"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="Ask about a hearing test on WhatsApp (opens in a new tab)"
                       >
-                        <Icon name="calendar" className="h-5 w-5" />
-                        Book an Appointment
+                        <SocialIcon id="whatsapp" className="h-5 w-5" />
+                        Ask about a hearing test
                       </Button>
                       <Button
                         href="/hearing-tests"
@@ -350,11 +366,15 @@ export default async function HomePage() {
 
                 <div className="relative mt-7 flex flex-col gap-3 sm:flex-row">
                   <Button
-                    href="/book-appointment"
+                    href={whatsappEnquiry("a hearing test")}
                     size="lg"
                     className="btn-lift !bg-white !text-brand-800 hover:!bg-brand-50"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Ask about a hearing test on WhatsApp (opens in a new tab)"
                   >
-                    Book a Hearing Test
+                    <SocialIcon id="whatsapp" className="h-5 w-5" />
+                    Ask about a hearing test
                   </Button>
                   <Button
                     href="/hearing-tests"
@@ -410,8 +430,15 @@ export default async function HomePage() {
 
                 {services.length === 0 ? (
                   <div className="rounded-2xl border border-border bg-surface p-6 text-sm text-ink-500 shadow-card">
-                    Our service catalogue is being finalised. Please call{" "}
-                    <a href={CLIENT.phoneHref} className="font-semibold text-brand-700">
+                    Our service catalogue is being finalised. Please message us
+                    on WhatsApp on{" "}
+                    <a
+                      href={WHATSAPP.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Chat with Quality Hearing Care on WhatsApp (opens in a new tab)"
+                      className="font-semibold text-brand-700"
+                    >
                       {CLIENT.phone}
                     </a>{" "}
                     for current availability.
@@ -537,13 +564,16 @@ export default async function HomePage() {
                       <Icon name="arrow-right" className="h-5 w-5" />
                     </Button>
                     <Button
-                      href="/book-appointment"
+                      href={whatsappEnquiry("hearing aids")}
                       size="lg"
                       variant="secondary"
                       className="btn-lift !border-white/25 !bg-white/[0.08] !text-white hover:!border-white/50 hover:!text-white"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Ask about hearing aids on WhatsApp (opens in a new tab)"
                     >
-                      <Icon name="calendar" className="h-5 w-5" />
-                      Book a Consultation
+                      <SocialIcon id="whatsapp" className="h-5 w-5" />
+                      Ask about hearing aids
                     </Button>
                   </div>
 
@@ -600,12 +630,15 @@ export default async function HomePage() {
                             View details
                           </Button>
                           <Button
-                            href="/book-appointment"
+                            href={whatsappEnquiry("hearing aids")}
                             size="sm"
                             variant="secondary"
                             className="btn-lift !border-white/25 !bg-white/[0.08] !text-white hover:!border-white/50 hover:!text-white"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            aria-label="Ask about hearing aids on WhatsApp (opens in a new tab)"
                           >
-                            Book a consultation
+                            Ask on WhatsApp
                           </Button>
                         </div>
                       </div>
@@ -669,7 +702,7 @@ export default async function HomePage() {
                   </h2>
                   <p className="mt-4 max-w-lg text-base leading-relaxed text-ink-500">
                     Prefer care at home? QUALITY Hearing Care also offers home
-                    consultation services. Book an appointment and our team can
+                    consultation services. Send us a message and our team can
                     coordinate a suitable visit.
                   </p>
                   <ul className="mt-6 space-y-3 text-sm text-ink-600">
@@ -688,13 +721,16 @@ export default async function HomePage() {
                   </ul>
                   <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                     <Button
-                      href="/book-appointment?type=HOME_CONSULTATION"
+                      href={homeConsultationHref}
                       variant="accent"
                       size="lg"
                       className="btn-lift"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Request a home consultation on WhatsApp (opens in a new tab)"
                     >
                       <Icon name="home" className="h-5 w-5" />
-                      Book Home Consultation
+                      Request Home Consultation
                     </Button>
                     <Button
                       href="/home-consultation"
@@ -758,7 +794,7 @@ export default async function HomePage() {
               <Reveal className="max-w-2xl">
                 <p className="eyebrow text-brand-700">The process</p>
                 <h2 className="headline mt-3 text-3xl text-ink-900 sm:text-4xl">
-                  What happens after you book
+                  What happens after you get in touch
                 </h2>
               </Reveal>
 
@@ -791,8 +827,8 @@ export default async function HomePage() {
                   <div className="flex h-full flex-col justify-end p-7">
                     <p className="eyebrow text-brand-200">No account needed</p>
                     <p className="mt-2 font-display text-lg font-semibold leading-snug text-white">
-                      Booking takes about a minute — a name and a mobile number
-                      is all it takes.
+                      One message is all it takes — and our team takes it from
+                      there.
                     </p>
                   </div>
                 </Photo>
@@ -859,9 +895,12 @@ export default async function HomePage() {
                 Everything you might be wondering
               </h2>
               <p className="mt-4 text-sm leading-relaxed text-ink-500">
-                Still unsure? Call us on{" "}
+                Still unsure? Message us on WhatsApp on{" "}
                 <a
-                  href={CLIENT.phoneHref}
+                  href={WHATSAPP.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Chat with Quality Hearing Care on WhatsApp (opens in a new tab)"
                   className="font-semibold text-brand-700 hover:text-brand-800"
                 >
                   {CLIENT.phone}
@@ -986,7 +1025,7 @@ export default async function HomePage() {
                       {CLIENT.phone}
                     </span>
                     <span className="block text-xs text-ink-400">
-                      Call for bookings &amp; enquiries
+                      Call for appointments &amp; enquiries
                     </span>
                   </span>
                 </a>
@@ -1007,7 +1046,10 @@ export default async function HomePage() {
                   </span>
                 </a>
                 <a
-                  href="/book-appointment?type=HOME_CONSULTATION"
+                  href={homeConsultationHref}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label="Request a home consultation on WhatsApp (opens in a new tab)"
                   className="flex items-center gap-4 bg-surface p-6 transition-colors hover:bg-accent-50"
                 >
                   <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-accent-600 text-white">
@@ -1054,7 +1096,7 @@ export default async function HomePage() {
               size="lg"
               className="btn-lift shrink-0"
             >
-              <Icon name="calendar" className="h-5 w-5" />
+              <Icon name="home" className="h-5 w-5" />
               {VIDEO.finalCta.cta.label}
             </Button>
             <Button

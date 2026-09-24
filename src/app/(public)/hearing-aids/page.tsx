@@ -4,13 +4,19 @@ import { Button, Container, Icon, type IconName } from "@/components/ui";
 import { PageHero } from "@/components/layout/PageHero";
 import { PHOTOS } from "@/lib/images";
 import { HearingAidDevice } from "@/components/brand/HearingAidDevice";
+import { SocialIcon } from "@/components/brand/SocialIcons";
 import { DeviceTypeArt, type DeviceArtType } from "@/components/brand/DeviceTypeArt";
 import { Reveal } from "@/components/motion/Reveal";
 import { VideoSection } from "@/components/media/VideoSection";
 import { VIDEO } from "@/lib/media";
 import { deviceTypeLabel, techLevelLabel } from "@/lib/hearing-aids";
 import { prisma } from "@/server/db/prisma";
-import { CLIENT } from "@/lib/client-info";
+import {
+  CLIENT,
+  homeConsultationHref,
+  WHATSAPP,
+  whatsappEnquiry,
+} from "@/lib/client-info";
 
 export const metadata = {
   title: "Hearing Aids in Hyderabad — QUALITY Hearing Care, Kukatpally",
@@ -151,21 +157,23 @@ export default async function HearingAidsPage() {
         actions={
           <>
             <Button
-              href="/book-appointment"
+              href={whatsappEnquiry("hearing aids")}
               size="lg"
               className="btn-lift !bg-white !text-brand-800 hover:!bg-brand-50"
+              aria-label="Ask about hearing aids on WhatsApp (opens in a new tab)"
             >
-              <Icon name="calendar" className="h-5 w-5" />
-              Book a Consultation
+              <SocialIcon id="whatsapp" className="h-5 w-5" />
+              Ask about hearing aids
             </Button>
             <Button
-              href="/book-appointment?type=HOME_CONSULTATION"
+              href={homeConsultationHref}
               variant="secondary"
               size="lg"
               className="btn-lift !border-white/25 !bg-white/[0.08] !text-white hover:!border-white/50 hover:!text-white"
+              aria-label="Request a home consultation on WhatsApp (opens in a new tab)"
             >
               <Icon name="home" className="h-5 w-5" />
-              Home Consultation
+              Request Home Consultation
             </Button>
           </>
         }
@@ -264,12 +272,17 @@ export default async function HearingAidsPage() {
                   hearing before you decide — we&apos;ll show you both.
                 </p>
                 <div className="mt-6 flex flex-col gap-3 sm:flex-row">
-                  <Button href="/book-appointment" size="lg" className="btn-lift">
-                    <Icon name="calendar" className="h-5 w-5" />
-                    Book a Consultation
+                  <Button
+                    href={whatsappEnquiry("rechargeable hearing aids")}
+                    size="lg"
+                    className="btn-lift"
+                    aria-label="Ask about rechargeable hearing aids on WhatsApp (opens in a new tab)"
+                  >
+                    <SocialIcon id="whatsapp" className="h-5 w-5" />
+                    Ask about rechargeable
                   </Button>
                   <Button href="/contact" variant="secondary" size="lg" className="btn-lift">
-                    Ask about rechargeable
+                    Send us a message
                   </Button>
                 </div>
               </div>
@@ -344,9 +357,14 @@ export default async function HearingAidsPage() {
                 hearing test tells you which of these situations yours is — and
                 that honest answer is part of the appointment, not a sales pitch.
               </p>
-              <Button href="/book-appointment" size="lg" className="btn-lift shrink-0">
-                <Icon name="calendar" className="h-5 w-5" />
-                Book a Hearing Test
+              <Button
+                href={whatsappEnquiry("a hearing test")}
+                size="lg"
+                className="btn-lift shrink-0"
+                aria-label="Ask about a hearing test on WhatsApp (opens in a new tab)"
+              >
+                <SocialIcon id="whatsapp" className="h-5 w-5" />
+                Ask about a hearing test
               </Button>
             </div>
           </Reveal>
@@ -396,12 +414,13 @@ export default async function HearingAidsPage() {
                   </p>
                   <div className="mt-7 flex flex-col gap-3 sm:flex-row">
                     <Button
-                      href="/book-appointment"
+                      href={whatsappEnquiry("hearing aids")}
                       size="lg"
                       className="btn-lift !bg-white !text-brand-800 hover:!bg-brand-50"
+                      aria-label="Ask about hearing aids on WhatsApp (opens in a new tab)"
                     >
-                      <Icon name="calendar" className="h-5 w-5" />
-                      Book a Consultation
+                      <SocialIcon id="whatsapp" className="h-5 w-5" />
+                      Ask about hearing aids
                     </Button>
                     <Button
                       href="/contact"
@@ -429,9 +448,12 @@ export default async function HearingAidsPage() {
                       Getting advice
                     </dt>
                     <dd className="mt-1.5 text-sm leading-relaxed text-brand-100/85">
-                      Call{" "}
+                      Message us on WhatsApp on{" "}
                       <a
-                        href={CLIENT.phoneHref}
+                        href={WHATSAPP.href}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        aria-label="Chat with Quality Hearing Care on WhatsApp (opens in a new tab)"
                         className="font-semibold text-white underline-offset-4 hover:underline"
                       >
                         {CLIENT.phone}
@@ -504,10 +526,12 @@ export default async function HearingAidsPage() {
 
                       <div className="mt-5 flex flex-wrap gap-3 border-t border-white/10 pt-5">
                         <Button
-                          href="/book-appointment"
+                          href={whatsappEnquiry("hearing aids")}
                           size="sm"
                           className="btn-lift !bg-white !text-brand-800 hover:!bg-brand-50"
+                          aria-label="Talk to our team on WhatsApp (opens in a new tab)"
                         >
+                          <SocialIcon id="whatsapp" className="h-4 w-4" />
                           Talk to our team
                         </Button>
                         <Button
@@ -563,7 +587,7 @@ export default async function HearingAidsPage() {
             <div className="mt-12 flex flex-col gap-4 rounded-3xl border border-brand-100 bg-gradient-to-br from-brand-50/70 to-surface p-8 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <h2 className="headline text-xl text-ink-900 sm:text-2xl">
-                  Book a hearing-aid consultation
+                  Ask us about hearing aids
                 </h2>
                 <p className="mt-2 max-w-xl text-sm leading-relaxed text-ink-600">
                   A hearing test first, then an honest conversation about whether
@@ -571,9 +595,14 @@ export default async function HearingAidsPage() {
                 </p>
               </div>
               <div className="flex shrink-0 flex-col gap-3 sm:flex-row">
-                <Button href="/book-appointment" size="lg" className="btn-lift">
-                  <Icon name="calendar" className="h-5 w-5" />
-                  Book a Consultation
+                <Button
+                  href={whatsappEnquiry("hearing aids")}
+                  size="lg"
+                  className="btn-lift"
+                  aria-label="Ask about hearing aids on WhatsApp (opens in a new tab)"
+                >
+                  <SocialIcon id="whatsapp" className="h-5 w-5" />
+                  Ask about hearing aids
                 </Button>
                 <Button href="/contact" variant="secondary" size="lg" className="btn-lift">
                   Ask us first

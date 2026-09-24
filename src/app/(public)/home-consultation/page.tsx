@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { Button, Container, Icon, type IconName } from "@/components/ui";
 import { PageHero } from "@/components/layout/PageHero";
 import { PHOTOS } from "@/lib/images";
@@ -7,12 +6,18 @@ import { SoundBars } from "@/components/brand/SoundWave";
 import { Reveal } from "@/components/motion/Reveal";
 import { VideoSection } from "@/components/media/VideoSection";
 import { VIDEO } from "@/lib/media";
-import { CLIENT } from "@/lib/client-info";
+import {
+  CLIENT,
+  homeConsultationHref,
+  WHATSAPP,
+  whatsappEnquiry,
+} from "@/lib/client-info";
+import { SocialIcon } from "@/components/brand/SocialIcons";
 
 export const metadata: Metadata = {
   title: "Home Consultation in Hyderabad — QUALITY Hearing Care",
   description:
-    "Prefer care at home? QUALITY Hearing Care offers home consultations in Hyderabad, subject to availability. Request a visit online and our team will call to confirm.",
+    "Prefer care at home? QUALITY Hearing Care offers home consultations in Hyderabad, subject to availability. Message us on WhatsApp and our team will call to confirm.",
   alternates: { canonical: "/home-consultation" },
 };
 
@@ -25,7 +30,7 @@ const POINTS: { icon: IconName; title: string; text: string }[] = [
   {
     icon: "calendar",
     title: "How it works",
-    text: "Request a visit online with your preferred date and time of day. Our team calls you back to confirm a suitable time before anything is finalised.",
+    text: "Message us on WhatsApp with your preferred day and time of day. Our team calls you back to confirm a suitable time before anything is finalised.",
   },
   {
     icon: "ear",
@@ -46,17 +51,18 @@ export default function HomeConsultationPage() {
             <span className="text-gradient-light">to you.</span>
           </>
         }
-        description="Prefer care at home? QUALITY Hearing Care also offers home consultation services. Book an appointment and our team can coordinate a suitable visit."
+        description="Prefer care at home? QUALITY Hearing Care also offers home consultation services. Send us a message and our team can coordinate a suitable visit."
         actions={
           <>
             <Button
-              href="/book-appointment?type=HOME_CONSULTATION"
+              href={homeConsultationHref}
               variant="accent"
               size="lg"
               className="btn-lift"
+              aria-label="Request a home consultation on WhatsApp (opens in a new tab)"
             >
               <Icon name="home" className="h-5 w-5" />
-              Book Home Consultation
+              Request Home Consultation
             </Button>
             <Button
               href={CLIENT.phoneHref}
@@ -128,7 +134,7 @@ export default function HomeConsultationPage() {
                   </h2>
                   <ol className="mt-7 space-y-5">
                     {[
-                      "Request online — pick a preferred date and time of day, no account needed",
+                      "Message us on WhatsApp with your preferred day and time of day — no account needed",
                       "We call to confirm a suitable visit window with you",
                       "Our team arrives with everything needed for the assessment",
                     ].map((step, i) => (
@@ -141,13 +147,24 @@ export default function HomeConsultationPage() {
                     ))}
                   </ol>
                   <Button
-                    href="/book-appointment?type=HOME_CONSULTATION"
+                    href={homeConsultationHref}
                     variant="accent"
                     size="lg"
                     className="btn-lift mt-8 w-full sm:w-auto"
+                    aria-label="Request a home consultation on WhatsApp (opens in a new tab)"
                   >
                     <Icon name="home" className="h-5 w-5" />
-                    Book Home Consultation
+                    Request Home Consultation
+                  </Button>
+                  <Button
+                    href={WHATSAPP.href}
+                    variant="secondary"
+                    size="lg"
+                    className="btn-lift mt-3 w-full sm:mt-8 sm:w-auto"
+                    aria-label="Chat with Quality Hearing Care on WhatsApp (opens in a new tab)"
+                  >
+                    <SocialIcon id="whatsapp" className="h-5 w-5" />
+                    WhatsApp us
                   </Button>
                   <p className="mt-4 text-xs leading-relaxed text-ink-400">
                     Your address is only ever visible to our authorised clinic
@@ -165,11 +182,14 @@ export default function HomeConsultationPage() {
                     </span>
                   </div>
                   <a
-                    href={CLIENT.phoneHref}
+                    href={WHATSAPP.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Chat with Quality Hearing Care on WhatsApp (opens in a new tab)"
                     className="flex items-center gap-4 rounded-2xl border border-border bg-surface p-4 transition-all hover:-translate-y-0.5 hover:border-brand-200 hover:shadow-lift"
                   >
                     <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-brand-50 text-brand-700">
-                      <Icon name="phone" className="h-5 w-5" />
+                      <SocialIcon id="whatsapp" className="h-5 w-5" />
                     </span>
                     <span className="font-display font-semibold text-ink-900">
                       {CLIENT.phone}
@@ -186,15 +206,26 @@ export default function HomeConsultationPage() {
                       {CLIENT.email}
                     </span>
                   </a>
-                  <p className="text-sm text-ink-500">
-                    Looking for a clinic appointment instead?{" "}
-                    <Link
-                      href="/book-appointment"
+                  <p className="text-sm leading-relaxed text-ink-500">
+                    Prefer to visit us? Call{" "}
+                    <a
+                      href={CLIENT.phoneHref}
+                      aria-label="Call Quality Hearing Care"
                       className="font-semibold text-brand-700 hover:text-brand-800"
                     >
-                      Book at our Kukatpally clinic
-                    </Link>
-                    .
+                      {CLIENT.phone}
+                    </a>{" "}
+                    or{" "}
+                    <a
+                      href={whatsappEnquiry("visiting the Kukatpally clinic")}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Ask about visiting the clinic on WhatsApp (opens in a new tab)"
+                      className="font-semibold text-brand-700 hover:text-brand-800"
+                    >
+                      message us on WhatsApp
+                    </a>{" "}
+                    to arrange a clinic visit at our Kukatpally clinic.
                   </p>
                 </div>
               </div>

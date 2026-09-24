@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 import { LegalList, LegalNote, LegalPage, type LegalSection } from "@/components/legal/LegalPage";
-import { CLIENT } from "@/lib/client-info";
+import { CLIENT, WHATSAPP } from "@/lib/client-info";
 
 export const metadata: Metadata = {
   // `absolute` — matches the brief exactly, avoiding the root template's
   // second brand stamp.
   title: { absolute: "Appointment Policy | Quality Hearing Care" },
   description:
-    "How booking, confirming, rescheduling and cancelling an appointment works at Quality Hearing Care, Kukatpally, Hyderabad — for clinic visits and home consultations.",
+    "How appointments are arranged, confirmed, rescheduled and cancelled at Quality Hearing Care, Kukatpally, Hyderabad — for clinic visits and home consultations.",
   alternates: { canonical: "/appointment-policy" },
 };
 
@@ -19,26 +19,26 @@ export const metadata: Metadata = {
 const SECTIONS: LegalSection[] = [
   {
     id: "how-to-book",
-    title: "How to Book",
+    title: "How to Arrange an Appointment",
     content: (
       <>
         <p>
-          You can book online, or by calling the clinic. Booking online takes a
-          few steps and does not need an account:
+          Appointments are arranged directly with the clinic. There is no online
+          booking form and no account to create — you contact us, and our team
+          confirms a time with you:
         </p>
         <LegalList
           items={[
-            "Choose an appointment type — Clinic Visit or Home Consultation.",
-            "Choose the service you are interested in (a hearing test, hearing-aid consultation, or another service the clinic offers).",
-            "Choose an available date and time.",
-            "Enter your details — name, mobile number, and email where asked. For a home consultation, also the address and locality for the visit.",
-            "Check the summary and confirm.",
+            "Message us on WhatsApp, call the clinic, or send a message from the contact page.",
+            "Tell us what you need — a hearing test, a hearing-aid consultation, another service, or a home consultation.",
+            "Tell us when suits you. We check what is available and confirm a time with you.",
+            "Give us your name, mobile number and, for a home consultation, the address and locality for the visit.",
           ]}
         />
         <p>
-          Once confirmed, you will see an appointment number on screen. Write it
-          down or take a screenshot — it is the quickest way for us to find your
-          booking when you contact us.
+          Home consultation requests are always confirmed by our team rather
+          than automatically, because the visit depends on availability and on
+          the location. Nothing is fixed until we have spoken with you.
         </p>
       </>
     ),
@@ -75,7 +75,7 @@ const SECTIONS: LegalSection[] = [
     content: (
       <>
         <p>
-          Home consultation is available. When you choose this option, tell us
+          Home consultation is available. When you ask about this option, tell us
           the address and locality where the visit is needed, and add any
           instructions that would help — for example parking, floor or lift
           access.
@@ -83,8 +83,8 @@ const SECTIONS: LegalSection[] = [
         <p>
           Home visit requests are reviewed and confirmed by our team rather than
           being finalised automatically, because the visit depends on
-          availability and on the location. After you submit a request, our team
-          will contact you to confirm.
+          availability and on the location. After you send us the details, our
+          team will contact you to confirm.
         </p>
         <p>
           Your address is used only to arrange and carry out the visit, and is
@@ -106,16 +106,17 @@ const SECTIONS: LegalSection[] = [
     content: (
       <>
         <p>
-          Your appointment time is held against your appointment number as soon
-          as the booking is accepted by the website.
+          An appointment is confirmed once our team has spoken with you and a
+          time has been agreed. Nothing sent through this website holds a slot on
+          its own.
         </p>
         <p>
           Our team may call you to confirm details or to check something about
           your appointment. If we cannot reach you on the number you gave, or if
-          a detail cannot be confirmed, we may need to reschedule.
+          a detail cannot be confirmed, we may need to arrange a different time.
         </p>
         <p>
-          A booking confirmation is not a diagnosis and does not replace an
+          Confirming an appointment is not a diagnosis and does not replace an
           assessment by a qualified professional at your appointment.
         </p>
       </>
@@ -145,15 +146,8 @@ const SECTIONS: LegalSection[] = [
           and we will help you move the appointment, subject to availability.
         </p>
         <p>
-          You can check the details of a booking you have made using our{" "}
-          <a
-            href="/booking-lookup"
-            className="font-semibold text-brand-700 underline-offset-4 hover:underline"
-          >
-            booking lookup
-          </a>{" "}
-          page, using your appointment number and the contact details you booked
-          with.
+          Message or call us with the name and mobile number the appointment was
+          arranged under, and we will find it for you.
         </p>
         <LegalNote>
           <p className="text-sm leading-relaxed text-ink-600">
@@ -171,20 +165,21 @@ const SECTIONS: LegalSection[] = [
       <>
         <p>
           If you no longer need your appointment, please let us know so the time
-          can be offered to another patient. Call or email the clinic with your
-          appointment number and we will cancel it for you.
+          can be offered to another patient. Call, message or email the clinic
+          with the name and mobile number it was arranged under, and we will
+          cancel it for you.
         </p>
         <p>
-          We may cancel or decline a booking where the details given are
+          We may cancel or decline an appointment where the details given are
           inaccurate, where the request cannot be safely accommodated, or where
-          a booking appears to be automated or abusive.
+          a request appears to be automated or abusive.
         </p>
         <LegalNote>
           <p className="text-sm leading-relaxed text-ink-600">
             The clinic has not published a cancellation fee, refund policy or
-            advance payment requirement for appointments booked through this
-            website. Please contact the clinic for the applicable details before
-            cancelling if you have any question about charges.
+            advance payment requirement. Please contact the clinic for the
+            applicable details before cancelling if you have any question about
+            charges.
           </p>
         </LegalNote>
       </>
@@ -196,11 +191,23 @@ const SECTIONS: LegalSection[] = [
     content: (
       <>
         <p>
-          For anything to do with an appointment, the fastest route is a phone
-          call. Have your appointment number ready if you can.
+          For anything to do with an appointment, the fastest routes are
+          WhatsApp and a phone call.
         </p>
         <LegalList
           items={[
+            <>
+              WhatsApp:{" "}
+              <a
+                href={WHATSAPP.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Chat with Quality Hearing Care on WhatsApp (opens in a new tab)"
+                className="font-semibold text-brand-700 underline-offset-4 hover:underline"
+              >
+                {CLIENT.phone}
+              </a>
+            </>,
             <>
               Phone:{" "}
               <a
@@ -263,7 +270,7 @@ export default function AppointmentPolicyPage() {
     <LegalPage
       eyebrow="Policies"
       title="Appointment Policy"
-      description="How booking works at our Hyderabad clinic, what to expect for clinic visits and home consultations, and how to change an appointment."
+      description="How appointments are arranged at our Hyderabad clinic, what to expect for clinic visits and home consultations, and how to change an appointment."
       lastUpdated="22 September 2026"
       sections={SECTIONS}
     />

@@ -1,15 +1,15 @@
-import Link from "next/link";
 import { Button, Container, Icon } from "@/components/ui";
 import { PageHero } from "@/components/layout/PageHero";
+import { SocialIcon } from "@/components/brand/SocialIcons";
 import { PHOTOS } from "@/lib/images";
 import { Reveal } from "@/components/motion/Reveal";
 import { listBranches } from "@/server/services/queries";
-import { CLIENT } from "@/lib/client-info";
+import { CLIENT, homeConsultationHref, WHATSAPP } from "@/lib/client-info";
 
 export const metadata = {
   title: "Our Clinic in Kukatpally, Hyderabad — QUALITY Hearing Care",
   description:
-    "Visit QUALITY Hearing Care at KPHB Phase 1, Kukatpally, Hyderabad. Get directions, call us, or book an appointment online — home consultation available on request.",
+    "Visit QUALITY Hearing Care at KPHB Phase 1, Kukatpally, Hyderabad. Get directions, call us, or message us on WhatsApp — home consultation available on request.",
   alternates: { canonical: "/branches" },
 };
 
@@ -31,12 +31,13 @@ export default async function BranchesPage() {
         actions={
           <>
             <Button
-              href="/book-appointment"
+              href={WHATSAPP.href}
               size="lg"
               className="btn-lift !bg-white !text-brand-800 hover:!bg-brand-50"
+              aria-label="Chat with Quality Hearing Care on WhatsApp (opens in a new tab)"
             >
-              <Icon name="calendar" className="h-5 w-5" />
-              Book at This Clinic
+              <SocialIcon id="whatsapp" className="h-5 w-5" />
+              Message us on WhatsApp
             </Button>
             <Button
               href={CLIENT.mapsUrl}
@@ -72,10 +73,13 @@ export default async function BranchesPage() {
             </a>
             <div className="mt-6 flex flex-wrap gap-x-6 gap-y-2 border-t border-white/10 pt-5 text-sm">
               <a
-                href={CLIENT.phoneHref}
+                href={WHATSAPP.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Chat with Quality Hearing Care on WhatsApp (opens in a new tab)"
                 className="inline-flex items-center gap-2 font-semibold text-white underline-offset-4 hover:underline"
               >
-                <Icon name="phone" className="h-4 w-4 text-brand-200" />
+                <SocialIcon id="whatsapp" className="h-4 w-4 text-brand-200" />
                 {CLIENT.phone}
               </a>
               <a
@@ -102,9 +106,12 @@ export default async function BranchesPage() {
                   Clinic details are being confirmed
                 </h2>
                 <p className="mx-auto mt-3 max-w-md text-sm leading-relaxed text-ink-500">
-                  Call us on{" "}
+                  Message us on WhatsApp on{" "}
                   <a
-                    href={CLIENT.phoneHref}
+                    href={WHATSAPP.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Chat with Quality Hearing Care on WhatsApp (opens in a new tab)"
                     className="font-semibold text-brand-700 hover:text-brand-800"
                   >
                     {CLIENT.phone}
@@ -132,16 +139,16 @@ export default async function BranchesPage() {
                               <p className="text-sm text-ink-500">{branch.city}</p>
                             ) : null}
                           </div>
-                          {branch.acceptsOnlineBookings ? (
-                            <span className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-brand-50 px-3 py-1 text-xs font-semibold text-brand-700">
-                              <span className="h-1.5 w-1.5 rounded-full bg-brand-600" aria-hidden="true" />
-                              Online booking open
-                            </span>
-                          ) : (
-                            <span className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-surface-muted px-3 py-1 text-xs font-semibold text-ink-500">
-                              Call to book
-                            </span>
-                          )}
+                          {/* The "online booking open / call to book" badge was
+                              tied to the retired booking engine — every clinic
+                              now takes enquiries the same way. */}
+                          <span className="ml-auto inline-flex items-center gap-1.5 rounded-full bg-surface-muted px-3 py-1 text-xs font-semibold text-ink-500">
+                            <span
+                              className="h-1.5 w-1.5 rounded-full bg-brand-600"
+                              aria-hidden="true"
+                            />
+                            Appointments by phone or WhatsApp
+                          </span>
                         </div>
 
                         {branch.address ? (
@@ -152,15 +159,13 @@ export default async function BranchesPage() {
 
                         <div className="mt-6 flex flex-col gap-3 sm:flex-row">
                           <Button
-                            href={branch.acceptsOnlineBookings ? `/book-appointment?branch=${branch.id}` : CLIENT.phoneHref}
+                            href={WHATSAPP.href}
                             size="md"
                             className="btn-lift"
+                            aria-label="Chat with Quality Hearing Care on WhatsApp (opens in a new tab)"
                           >
-                            <Icon
-                              name={branch.acceptsOnlineBookings ? "calendar" : "phone"}
-                              className="h-4 w-4"
-                            />
-                            {branch.acceptsOnlineBookings ? "Book at This Clinic" : "Call to book"}
+                            <SocialIcon id="whatsapp" className="h-4 w-4" />
+                            Message us on WhatsApp
                           </Button>
                           <Button
                             href={`/branches/${branch.code.toLowerCase()}`}
@@ -219,12 +224,15 @@ export default async function BranchesPage() {
           <Reveal delay={120}>
             <p className="mt-8 text-sm leading-relaxed text-ink-500">
               Can&apos;t travel to the clinic?{" "}
-              <Link
-                href="/book-appointment?type=HOME_CONSULTATION"
+              <a
+                href={homeConsultationHref}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Request a home consultation on WhatsApp (opens in a new tab)"
                 className="font-semibold text-brand-700 hover:text-brand-800"
               >
-                Request a home consultation
-              </Link>{" "}
+                Request a home consultation on WhatsApp
+              </a>{" "}
               and our team will contact you to arrange a suitable time.
             </p>
           </Reveal>

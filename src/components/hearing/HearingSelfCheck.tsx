@@ -3,13 +3,15 @@
 import Link from "next/link";
 import { useId, useMemo, useState } from "react";
 import { Button, Icon } from "@/components/ui";
+import { SocialIcon } from "@/components/brand/SocialIcons";
+import { whatsappEnquiry } from "@/lib/client-info";
 
 /**
  * "Signs to look out for" self-check.
  *
  * This is deliberately NOT a hearing test and says so, in the heading, the
  * intro and the result. It collects nothing, sends nothing and stores nothing —
- * it is a prompt to think about symptoms and to book a real assessment. That
+ * it is a prompt to think about symptoms and to ask about a real assessment. That
  * distinction matters both ethically and for the brand: a website must never
  * imply it has diagnosed someone.
  *
@@ -109,9 +111,14 @@ export function HearingSelfCheck() {
         </p>
 
         <div className="mt-7 flex flex-col gap-3">
-          <Button href="/book-appointment" size="lg" className="btn-lift w-full justify-center">
-            <Icon name="calendar" className="h-5 w-5" />
-            Book a Hearing Assessment
+          <Button
+            href={whatsappEnquiry("a hearing assessment")}
+            size="lg"
+            className="btn-lift w-full justify-center"
+            aria-label="Ask about a hearing assessment on WhatsApp (opens in a new tab)"
+          >
+            <SocialIcon id="whatsapp" className="h-5 w-5" />
+            Ask about a hearing assessment
           </Button>
           <Button
             href="/hearing-tests"

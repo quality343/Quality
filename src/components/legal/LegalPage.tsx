@@ -2,7 +2,12 @@ import type { ReactNode } from "react";
 import Link from "next/link";
 import { Button, Container, Icon } from "@/components/ui";
 import { PageHero } from "@/components/layout/PageHero";
-import { CLIENT } from "@/lib/client-info";
+import {
+  CLIENT,
+  homeConsultationHref,
+  WHATSAPP,
+} from "@/lib/client-info";
+import { SocialIcon } from "@/components/brand/SocialIcons";
 
 /**
  * Shared shell for the public policy pages (Terms, Privacy, Appointment
@@ -97,11 +102,23 @@ export function LegalPage({
                   Questions about this policy?
                 </h2>
                 <p className="mt-2 text-sm leading-relaxed text-ink-600">
-                  Call or email the clinic and our team will help. For anything
-                  about a specific appointment, please have your appointment
-                  number ready.
+                  Message us on WhatsApp, call or email the clinic and our team
+                  will help. For anything about a specific appointment, mention
+                  the name and number it was arranged under.
                 </p>
                 <ul className="mt-5 space-y-2.5 text-sm">
+                  <li>
+                    <a
+                      href={WHATSAPP.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label="Chat with Quality Hearing Care on WhatsApp (opens in a new tab)"
+                      className="inline-flex items-center gap-2.5 font-semibold text-brand-700 hover:text-brand-800"
+                    >
+                      <SocialIcon id="whatsapp" className="h-4 w-4 shrink-0" />
+                      {CLIENT.phone}
+                    </a>
+                  </li>
                   <li>
                     <a
                       href={CLIENT.phoneHref}
@@ -109,7 +126,7 @@ export function LegalPage({
                       className="inline-flex items-center gap-2.5 font-semibold text-brand-700 hover:text-brand-800"
                     >
                       <Icon name="phone" className="h-4 w-4 shrink-0" />
-                      {CLIENT.phone}
+                      Call {CLIENT.phone}
                     </a>
                   </li>
                   <li>
@@ -140,9 +157,13 @@ export function LegalPage({
                     <Icon name="arrow-right" className="h-4 w-4 rotate-180" />
                     Back to Home
                   </Button>
-                  <Button href="/book-appointment" size="md">
-                    <Icon name="calendar" className="h-4 w-4" />
-                    Book an Appointment
+                  <Button
+                    href={homeConsultationHref}
+                    size="md"
+                    aria-label="Request a home consultation on WhatsApp (opens in a new tab)"
+                  >
+                    <Icon name="home" className="h-4 w-4" />
+                    Request Home Consultation
                   </Button>
                 </div>
                 <p className="mt-5 text-xs text-ink-500">

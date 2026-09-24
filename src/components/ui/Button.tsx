@@ -33,12 +33,44 @@ type ButtonAsLink = ComponentProps<typeof Link> & {
   size?: Size;
 };
 
+/**
+ * Anything that leaves the Next router — WhatsApp, tel:, mailto:, Maps.
+ *
+ * These render a plain `<a>`: `next/link` would try to prefetch and push a
+ * client-side transition for a destination it does not own, which is what made
+ * the WhatsApp CTAs open an empty router state instead of the chat.
+ */
+const EXTERNAL_HREF = /^(https?:|mailto:|tel:)/i;
+
 export function Button(props: ButtonAsButton | ButtonAsLink) {
   const { variant = "primary", size = "md", className, ...rest } = props;
   const classes = `${BASE} ${VARIANTS[variant]} ${SIZES[size]} ${className ?? ""}`;
 
   if ("href" in props && props.href !== undefined) {
-    return <Link className={classes} {...(rest as ComponentProps<typeof Link>)} />;
+    const { href, ...anchorProps } = rest as ComponentProps<typeof Link> & {
+      href: string;
+    };
+
+    if (EXTERNAL_HREF.test(href)) {
+      // Web destinations open in a new tab by default (WhatsApp Web, Maps,
+      // socials) so the visitor never loses the page they were reading.
+      // `tel:` and `mailto:` stay in place — the OS handles those. An explicit
+      // `target` at the call site still wins, since it spreads last.
+      const newTab = /^https?:/i.test(href)
+        ? { target: "_blank", rel: "noopener noreferrer" }
+        : {};
+
+      return (
+        <a
+          href={href}
+          className={classes}
+          {...newTab}
+          {...(anchorProps as ComponentProps<"a">)}
+        />
+      );
+    }
+
+    return <Link href={href} className={classes} {...anchorProps} />;
   }
 
   return <button className={classes} {...(rest as ComponentProps<"button">)} />;

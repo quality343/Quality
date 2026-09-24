@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Button, Card, Container, Icon } from "@/components/ui";
-import { CLIENT } from "@/lib/client-info";
+import { CLIENT, homeConsultationHref, WHATSAPP } from "@/lib/client-info";
+import { SocialIcon } from "@/components/brand/SocialIcons";
 import { prisma } from "@/server/db/prisma";
 
 type Params = Promise<{ slug: string }>;
@@ -14,7 +15,7 @@ export async function generateMetadata({ params }: { params: Params }) {
   if (!branch) return { title: "Branch not found" };
   return {
     title: `${branch.name} — QUALITY Hearing Care`,
-    description: `Visit QUALITY Hearing Care at ${branch.name}. Call ${CLIENT.phone} or book an appointment online.`,
+    description: `Visit QUALITY Hearing Care at ${branch.name}. Call ${CLIENT.phone} or message us on WhatsApp to arrange a visit.`,
     alternates: { canonical: `/branches/${slug}` },
   };
 }
@@ -90,13 +91,17 @@ export default async function BranchDetailPage({ params }: { params: Params }) {
           <Card className="mt-6 bg-brand-50/60">
             <h2 className="text-base font-semibold text-ink-900">Home Consultation</h2>
             <p className="mt-2 text-sm text-ink-600">
-              Available from this location — book online and our team will
-              coordinate a suitable visit time with you.
+              Available from this location — message us on WhatsApp and our
+              team will coordinate a suitable visit time with you.
             </p>
             <div className="mt-4">
-              <Button href="/book-appointment?type=HOME_CONSULTATION" variant="accent">
+              <Button
+                href={homeConsultationHref}
+                variant="accent"
+                aria-label="Request a home consultation on WhatsApp (opens in a new tab)"
+              >
                 <Icon name="home" className="h-4 w-4" />
-                Book Home Consultation
+                Request Home Consultation
               </Button>
             </div>
           </Card>
@@ -125,10 +130,18 @@ export default async function BranchDetailPage({ params }: { params: Params }) {
           )}
         </Card>
 
-        <div className="mt-8">
-          <Button href={`/book-appointment?branch=${branch.id}`} size="lg">
-            <Icon name="calendar" className="h-5 w-5" />
-            Book at This Clinic
+        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+          <Button
+            href={WHATSAPP.href}
+            size="lg"
+            aria-label="Chat with Quality Hearing Care on WhatsApp (opens in a new tab)"
+          >
+            <SocialIcon id="whatsapp" className="h-5 w-5" />
+            Message us on WhatsApp
+          </Button>
+          <Button href={CLIENT.phoneHref} variant="secondary" size="lg">
+            <Icon name="phone" className="h-5 w-5" />
+            Call {CLIENT.phone}
           </Button>
         </div>
       </div>

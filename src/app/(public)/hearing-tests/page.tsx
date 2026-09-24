@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { Button, Container, Icon } from "@/components/ui";
+import { SocialIcon } from "@/components/brand/SocialIcons";
+import { homeConsultationHref, whatsappEnquiry } from "@/lib/client-info";
 import { PageHero } from "@/components/layout/PageHero";
 import { PHOTOS } from "@/lib/images";
 import { AudiogramExplainer } from "@/components/brand/SoundWave";
@@ -11,7 +13,7 @@ import { prisma } from "@/server/db/prisma";
 export const metadata = {
   title: "Hearing Tests in Hyderabad — QUALITY Hearing Care, Kukatpally",
   description:
-    "Hearing tests explained simply: pure tone audiometry, speech audiometry, tympanometry, ABR/BERA and OAE at QUALITY Hearing Care, Kukatpally, Hyderabad. Book online.",
+    "Hearing tests explained simply: pure tone audiometry, speech audiometry, tympanometry, ABR/BERA and OAE at QUALITY Hearing Care, Kukatpally, Hyderabad. Message us on WhatsApp to arrange a test.",
   alternates: { canonical: "/hearing-tests" },
 };
 
@@ -90,12 +92,13 @@ export default async function HearingTestsPage() {
         actions={
           <>
             <Button
-              href="/book-appointment"
+              href={whatsappEnquiry("a hearing test")}
               size="lg"
               className="btn-lift !bg-white !text-brand-800 hover:!bg-brand-50"
+              aria-label="Ask about a hearing test on WhatsApp (opens in a new tab)"
             >
-              <Icon name="calendar" className="h-5 w-5" />
-              Book a Hearing Test
+              <SocialIcon id="whatsapp" className="h-5 w-5" />
+              Ask about a hearing test
             </Button>
             <Button
               href="/contact"
@@ -209,9 +212,14 @@ export default async function HearingTestsPage() {
                       </dl>
 
                       <div className="mt-6 flex flex-wrap items-center gap-3 border-t border-border pt-5">
-                        <Button href={`/book-appointment?service=${service.id}`} size="sm" className="btn-lift">
-                          <Icon name="calendar" className="h-4 w-4" />
-                          Book This Test
+                        <Button
+                          href={whatsappEnquiry(service.name)}
+                          size="sm"
+                          className="btn-lift"
+                          aria-label={`Ask about ${service.name} on WhatsApp (opens in a new tab)`}
+                        >
+                          <SocialIcon id="whatsapp" className="h-4 w-4" />
+                          Ask about this test
                         </Button>
                         <Link
                           href={`/services/${service.code.toLowerCase()}`}
@@ -237,13 +245,20 @@ export default async function HearingTestsPage() {
           <Reveal>
             <h2 className="headline text-2xl sm:text-3xl">Not sure which test you need?</h2>
             <p className="mt-2 max-w-xl text-sm leading-relaxed text-brand-100/85">
-              You don&apos;t have to decide. Book a consultation and our team will
+              You don&apos;t have to decide. Message us and our team will
               recommend the right assessment for you — or call and ask.
             </p>
           </Reveal>
           <Reveal delay={80} className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">
-            <Button href="/book-appointment" variant="accent" size="lg" className="btn-lift shrink-0">
-              Book an Appointment
+            <Button
+              href={homeConsultationHref}
+              variant="accent"
+              size="lg"
+              className="btn-lift shrink-0"
+              aria-label="Request a home consultation on WhatsApp (opens in a new tab)"
+            >
+              <Icon name="home" className="h-5 w-5" />
+              Request Home Consultation
             </Button>
             <Button
               href="/home-consultation"

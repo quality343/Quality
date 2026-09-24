@@ -1,9 +1,10 @@
 import Link from "next/link";
 import { Button, Container, Icon } from "@/components/ui";
 import { PageHero } from "@/components/layout/PageHero";
+import { SocialIcon } from "@/components/brand/SocialIcons";
 import { PHOTOS } from "@/lib/images";
 import { Reveal } from "@/components/motion/Reveal";
-import { CLIENT } from "@/lib/client-info";
+import { CLIENT, homeConsultationHref, WHATSAPP } from "@/lib/client-info";
 import { ContactForm } from "./ContactForm";
 
 export const metadata = {
@@ -36,13 +37,14 @@ export default function ContactPage() {
               Call {CLIENT.phone}
             </Button>
             <Button
-              href="/book-appointment"
+              href={homeConsultationHref}
               variant="secondary"
               size="lg"
               className="btn-lift !border-white/25 !bg-white/[0.08] !text-white hover:!border-white/50 hover:!text-white"
+              aria-label="Request a home consultation on WhatsApp (opens in a new tab)"
             >
-              <Icon name="calendar" className="h-5 w-5" />
-              Book an Appointment
+              <Icon name="home" className="h-5 w-5" />
+              Request Home Consultation
             </Button>
           </>
         }
@@ -91,9 +93,13 @@ export default function ContactPage() {
               <div className="rounded-3xl border border-border bg-surface p-8 shadow-card sm:p-10">
                 <h2 className="headline text-2xl text-ink-900">Send us a message</h2>
                 <p className="mt-2 text-sm leading-relaxed text-ink-500">
-                  We read every message. For the fastest answer, call{" "}
+                  We read every message. For the fastest answer, message us on
+                  WhatsApp on{" "}
                   <a
-                    href={CLIENT.phoneHref}
+                    href={WHATSAPP.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Chat with Quality Hearing Care on WhatsApp (opens in a new tab)"
                     className="font-semibold text-brand-700 hover:text-brand-800"
                   >
                     {CLIENT.phone}
@@ -146,29 +152,31 @@ export default function ContactPage() {
                   <div className="dot-grid absolute inset-0 opacity-50" aria-hidden="true" />
                   <div className="relative">
                     <h2 className="font-display text-lg font-semibold tracking-tight">
-                      Book instead
+                      Message us instead
                     </h2>
                     <p className="mt-2 text-sm leading-relaxed text-brand-100/80">
-                      Know what you need? Book directly — a clinic visit or a
-                      home consultation. No account required.
+                      Know what you need? Send us a message on WhatsApp and our
+                      team will take it from there. No account required.
                     </p>
                     <div className="mt-5 flex flex-col gap-3">
                       <Button
-                        href="/book-appointment"
+                        href={homeConsultationHref}
                         size="md"
                         className="btn-lift w-full !bg-white !text-brand-800 hover:!bg-brand-50"
+                        aria-label="Request a home consultation on WhatsApp (opens in a new tab)"
                       >
-                        <Icon name="calendar" className="h-4 w-4" />
-                        Book an Appointment
+                        <Icon name="home" className="h-4 w-4" />
+                        Request Home Consultation
                       </Button>
                       <Button
-                        href="/book-appointment?type=HOME_CONSULTATION"
+                        href={WHATSAPP.href}
                         variant="secondary"
                         size="md"
                         className="btn-lift w-full !border-white/25 !bg-white/[0.08] !text-white hover:!border-white/50 hover:!text-white"
+                        aria-label="Chat with Quality Hearing Care on WhatsApp (opens in a new tab)"
                       >
-                        <Icon name="home" className="h-4 w-4" />
-                        Book Home Consultation
+                        <SocialIcon id="whatsapp" className="h-4 w-4" />
+                        WhatsApp us
                       </Button>
                     </div>
                   </div>
@@ -180,8 +188,8 @@ export default function ContactPage() {
                   </h2>
                   <p className="mt-2 text-sm leading-relaxed text-ink-600">
                     Prefer care at home? QUALITY Hearing Care also offers home
-                    consultation services. Book online and our team can
-                    coordinate a suitable visit.
+                    consultation services. Message us on WhatsApp and our team
+                    can coordinate a suitable visit.
                   </p>
                   <Link
                     href="/home-consultation"

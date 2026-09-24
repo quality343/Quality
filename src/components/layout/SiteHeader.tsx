@@ -4,8 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { BrandLogo } from "@/components/brand/BrandLogo";
+import { SocialIcon } from "@/components/brand/SocialIcons";
 import { Button, Container, Icon } from "@/components/ui";
-import { CLIENT } from "@/lib/client-info";
+import { CLIENT, homeConsultationHref, WHATSAPP } from "@/lib/client-info";
 
 /**
  * Primary navigation.
@@ -13,6 +14,10 @@ import { CLIENT } from "@/lib/client-info";
  * Hearing tests and hearing aids are *services*, not separate destinations, so
  * they live under Services rather than beside it. Both keep their own routes
  * and pages — this only changes where they are listed.
+ *
+ * The clinic no longer takes online bookings, so the header's single action is
+ * the contact route: WhatsApp. The number is labelled, never a bare icon, so it
+ * is obvious where a tap leads.
  *
  * The desktop dropdown is stateful rather than CSS-only. Hover and focus only
  * *set* the open panel; it is cleared on selection, on route change, on an
@@ -247,17 +252,29 @@ export function SiteHeader({
         </nav>
 
         <div className="hidden items-center gap-3 lg:flex">
-          {/* Phone is desktop-wide only; the drawer carries it on smaller screens. */}
+          {/* The number is desktop-wide only; the drawer carries it on smaller
+              screens. It opens WhatsApp, which is how the clinic prefers to be
+              reached — the call-back number stays available in the footer. */}
           <a
-            href={CLIENT.phoneHref}
+            href={WHATSAPP.href}
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label={`Chat with ${CLIENT.name} on WhatsApp (opens in a new tab)`}
             className="hidden items-center gap-2 text-sm font-semibold text-ink-700 transition-colors hover:text-brand-700 2xl:flex"
           >
-            <Icon name="phone" className="h-4 w-4" />
+            <SocialIcon id="whatsapp" className="h-4 w-4 text-brand-700" />
             {CLIENT.phone}
           </a>
-          <Button href="/book-appointment" size="sm" className="btn-lift">
-            <Icon name="calendar" className="h-4 w-4" />
-            Book Appointment
+          <Button
+            href={homeConsultationHref}
+            size="sm"
+            className="btn-lift"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="Request a home consultation on WhatsApp (opens in a new tab)"
+          >
+            <Icon name="home" className="h-4 w-4" />
+            Request Home Consultation
           </Button>
         </div>
 
@@ -384,25 +401,36 @@ export function SiteHeader({
             })}
 
             <div className="mt-4 flex flex-col gap-3 border-t border-border pt-4">
-              <Button href="/book-appointment" size="lg" className="btn-lift w-full">
-                <Icon name="calendar" className="h-5 w-5" />
-                Book Appointment
+              <Button
+                href={homeConsultationHref}
+                size="lg"
+                className="btn-lift w-full"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Request a home consultation on WhatsApp (opens in a new tab)"
+              >
+                <Icon name="home" className="h-5 w-5" />
+                Request Home Consultation
               </Button>
               <Button
-                href="/book-appointment?type=HOME_CONSULTATION"
+                href={WHATSAPP.href}
                 variant="secondary"
                 size="lg"
                 className="btn-lift w-full"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="Chat with Quality Hearing Care on WhatsApp (opens in a new tab)"
               >
-                <Icon name="home" className="h-5 w-5" />
-                Home Consultation
+                <SocialIcon id="whatsapp" className="h-5 w-5 text-brand-700" />
+                WhatsApp us
               </Button>
               <a
                 href={CLIENT.phoneHref}
+                aria-label="Call Quality Hearing Care"
                 className="flex min-h-12 items-center justify-center gap-2 rounded-lg text-base font-semibold text-brand-700"
               >
                 <Icon name="phone" className="h-5 w-5" />
-                {CLIENT.phone}
+                Call {CLIENT.phone}
               </a>
             </div>
           </Container>
