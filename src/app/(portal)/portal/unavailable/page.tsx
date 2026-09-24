@@ -29,7 +29,8 @@ export default async function DeferredPortalPage() {
         </h1>
         <p className="mt-3 text-sm leading-relaxed text-ink-600">
           QUALITY Hearing Care currently runs as a public clinic website with
-          online appointment booking and a single clinic-operations portal.
+          enquiries and home-consultation requests, plus a single
+          clinic-operations portal.
           Clinical records, therapy, patient accounts and platform
           administration are deferred — your account is intact, but there is
           nothing for it to open yet.
@@ -37,10 +38,10 @@ export default async function DeferredPortalPage() {
 
         <div className="mt-6 space-y-2">
           <Link
-            href="/book-appointment"
+            href="/home-consultation"
             className="flex min-h-11 w-full items-center justify-center rounded-lg bg-brand-700 px-4 text-sm font-semibold text-white hover:bg-brand-800"
           >
-            Book an appointment
+            Request a home consultation
           </Link>
           {clinicOps ? (
             <Link

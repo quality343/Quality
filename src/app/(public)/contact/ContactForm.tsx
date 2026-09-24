@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { submitContactEnquiry } from "../book-appointment/actions";
+import { submitContactEnquiry } from "./actions";
 
 const INTERESTS = [
   "Hearing Test",

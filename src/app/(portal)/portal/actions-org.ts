@@ -67,7 +67,6 @@ export async function branchUpsertAction(raw: unknown): Promise<ActionResult<{ i
     revalidatePath("/branches");
     revalidatePath("/contact");
     revalidatePath("/home-consultation");
-    revalidatePath("/book-appointment");
     return { ok: true, data: { id: branch.id }, message: "Branch saved." };
   } catch (error) {
     return toActionResult(error);

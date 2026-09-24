@@ -30,14 +30,14 @@ export default async function LoginPage() {
       </div>
 
       <p className="mt-6 rounded-lg bg-surface-muted p-3 text-xs leading-relaxed text-ink-500">
-        Looking to book an appointment? No account is needed —{" "}
+        Looking to reach the clinic? No account is needed —{" "}
         <Link
-          href="/book-appointment"
+          href="/home-consultation"
           className="font-semibold text-brand-700 hover:text-brand-800"
         >
-          book online
+          request a home consultation
         </Link>{" "}
-        in about a minute, or call{" "}
+        or call{" "}
         <a href={CLIENT.phoneHref} className="font-semibold text-brand-700">
           {CLIENT.phone}
         </a>

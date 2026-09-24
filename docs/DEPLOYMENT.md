@@ -189,9 +189,12 @@ After deploying, confirm:
   seam: bookings are confirmed in-app only, and nothing claims a message was
   sent. Implement `sendEmail`/`sendSMS` there and flip `NOTIFY_EMAIL` /
   `NOTIFY_SMS` when a provider (Resend, SES, MSG91, Twilio) is chosen.
-- **Rate limiting is documented, not enforced.** Public forms and the booking
-  endpoint validate server-side but have no request throttle. If abuse appears,
-  put Netlify's rate limiting or a WAF rule in front of
-  `/book-appointment` and `/api/*`.
+- **Rate limiting is documented, not enforced.** Public forms validate
+  server-side but have no request throttle. If abuse appears, put Netlify's
+  rate limiting or a WAF rule in front of `/contact` and `/api/*`.
+- **The public booking flow was retired.** `/book-appointment`, `/booking/…`
+  and `/booking-lookup` are permanent redirects to `/home-consultation` and
+  `/contact`. The clinic is contacted by WhatsApp, phone or email instead; the
+  admin portal still manages the internal appointment records.
 - **Photography is licensed stock** standing in for the clinic's own photos.
   See `public/images/README.md` for how to swap each one via `src/lib/images.ts`.
