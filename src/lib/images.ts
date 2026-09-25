@@ -160,6 +160,61 @@ export const PHOTOS = {
     height: 557,
     alt: "Two compact hearing aids docked in an open white charging case",
   },
+
+  /* ── The six formats ─────────────────────────────────────────
+   * One client-supplied photograph per format, used as the card image in the
+   * "Types of hearing aids" section. They are the clinic's own photographs and
+   * carry no legible manufacturer branding, so no brand is implied. Each alt
+   * describes what is actually in that frame — the point of this section is
+   * that the picture matches the name beside it. */
+
+  /** Tiny shell held on a fingertip, with an ear shown for scale. */
+  hearingAidIic: {
+    src: "/images/hearing-aid-iic.jpg",
+    width: 836,
+    height: 557,
+    alt: "A very small black in-the-canal hearing aid held on a fingertip beside an ear, showing how little of it is visible",
+  },
+
+  /** Slim body behind the ear joined by a thin wire to a dome in the canal. */
+  hearingAidRic: {
+    src: "/images/hearing-aid-ric.jpg",
+    width: 1200,
+    height: 800,
+    alt: "A receiver-in-canal hearing aid: a slim body with a thin wire ending in a dome, shown in the hand and worn in the ear",
+  },
+
+  /** Custom shells with removal cords, seated deep in the canal. */
+  hearingAidCic: {
+    src: "/images/hearing-aid-cic.jpg",
+    width: 1200,
+    height: 800,
+    alt: "Two custom completely-in-canal hearing aids with fine removal cords, and one worn deep in the ear canal",
+  },
+
+  /** Custom shells that fill the canal opening. */
+  hearingAidItc: {
+    src: "/images/hearing-aid-itc.jpg",
+    width: 1200,
+    height: 800,
+    alt: "Two custom in-the-canal hearing aids showing their battery doors, and one seated at the opening of an ear canal",
+  },
+
+  /** Body moulded to sit behind the ear, with the custom earmould beside it. */
+  hearingAidBte: {
+    src: "/images/hearing-aid-bte.jpg",
+    width: 1200,
+    height: 800,
+    alt: "A behind-the-ear hearing aid shown next to its custom skin-toned earmould",
+  },
+
+  /** Aids docked in an open charging case with the charge indicators lit. */
+  hearingAidRechargeable: {
+    src: "/images/hearing-aid-rechargeable.jpg",
+    width: 1200,
+    height: 800,
+    alt: "A rechargeable hearing aid beside its open charging case, with the charge indicators lit and a second aid docked inside",
+  },
 } as const satisfies Record<string, SitePhoto>;
 
 export type PhotoKey = keyof typeof PHOTOS;

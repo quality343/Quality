@@ -82,7 +82,7 @@ export function VideoSection({
 
   return (
     <section className={TONE[tone]} aria-labelledby={headingId}>
-      <Container className="py-16 sm:py-20">
+      <Container className="py-12 sm:py-16">
         <div className="grid gap-10 lg:grid-cols-[0.92fr_1.08fr] lg:items-center">
           {/* Copy column */}
           <Reveal>

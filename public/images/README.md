@@ -51,6 +51,26 @@ clip goes public on the homepage. See `public/video/README.md`.
 | `hearing-aid-gold.jpg` | Supplied by QUALITY Hearing Care (WhatsApp, 2026-09-22) | Owned by QUALITY Hearing Care | Poster/fallback still for the homepage device clip |
 | `hearing-aid-pair.jpg` | Supplied by QUALITY Hearing Care (WhatsApp, 2026-09-22) | Owned by QUALITY Hearing Care | Hearing-aids page hero card |
 | `hearing-aid-charging-case.jpg` | Supplied by QUALITY Hearing Care (WhatsApp, 2026-09-22) | Owned by QUALITY Hearing Care | "Types of hearing aids" — rechargeable callout |
+| `hearing-aid-iic.jpg` | Supplied by QUALITY Hearing Care (WhatsApp, 2026-09-25) | Owned by QUALITY Hearing Care | "Types of hearing aids" — IIC card |
+| `hearing-aid-ric.jpg` | Supplied by QUALITY Hearing Care (WhatsApp, 2026-09-25) | Owned by QUALITY Hearing Care | "Types of hearing aids" — RIC card |
+| `hearing-aid-cic.jpg` | Supplied by QUALITY Hearing Care (WhatsApp, 2026-09-25) | Owned by QUALITY Hearing Care | "Types of hearing aids" — CIC card |
+| `hearing-aid-itc.jpg` | Supplied by QUALITY Hearing Care (WhatsApp, 2026-09-25) | Owned by QUALITY Hearing Care | "Types of hearing aids" — ITC card |
+| `hearing-aid-bte.jpg` | Supplied by QUALITY Hearing Care (WhatsApp, 2026-09-25) | Owned by QUALITY Hearing Care | "Types of hearing aids" — BTE card |
+| `hearing-aid-rechargeable.jpg` | Supplied by QUALITY Hearing Care (WhatsApp, 2026-09-25) | Owned by QUALITY Hearing Care | "Types of hearing aids" — rechargeable card |
+
+The six format photographs arrived as one set on 2026-09-25 and are now the card
+images in the "Types of hearing aids" section, one per format. They replaced the
+original vector artwork that used to illustrate that section.
+
+The IIC file is a **crop** of the supplied image: the original is a marketing
+panel carrying the heading "IIC / Invisible in canal" and a three-step strip,
+which duplicated this site's own copy and was illegible at card size. The crop
+keeps only the photograph (the aid on a fingertip and the ear beside it). The
+other five are used as supplied, resized to 1200px on the long edge.
+
+If a card image ever looks like the wrong format, the fix is one line in
+`src/lib/images.ts` — tell the clinic which supplied file belongs to which card
+and swap the `src`.
 
 All are JPEGs at 720–1340px on the long edge, so they are fine at the sizes
 used here but are **not suitable for print or large banners**. Ask the clinic

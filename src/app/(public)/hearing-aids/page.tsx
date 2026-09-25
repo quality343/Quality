@@ -2,10 +2,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button, Container, Icon, type IconName } from "@/components/ui";
 import { PageHero } from "@/components/layout/PageHero";
-import { PHOTOS } from "@/lib/images";
+import { PHOTOS, type SitePhoto } from "@/lib/images";
 import { HearingAidDevice } from "@/components/brand/HearingAidDevice";
 import { SocialIcon } from "@/components/brand/SocialIcons";
-import { DeviceTypeArt, type DeviceArtType } from "@/components/brand/DeviceTypeArt";
 import { Reveal } from "@/components/motion/Reveal";
 import { VideoSection } from "@/components/media/VideoSection";
 import { VIDEO } from "@/lib/media";
@@ -50,10 +49,12 @@ function listPublicModels() {
  * brand or a claim about how well any one device performs.
  */
 const DEVICE_TYPES: {
-  code: DeviceArtType;
+  code: string;
   label: string;
   name: string;
   text: string;
+  /** The clinic's own photograph of exactly this format. */
+  photo: SitePhoto;
   /** The one format visitors ask about most, so it is called out. */
   highlighted?: boolean;
   badge?: string;
@@ -63,24 +64,28 @@ const DEVICE_TYPES: {
     label: "IIC",
     name: "Invisible in canal",
     text: "Custom-made from an impression of your ear and worn deep in the canal, so it stays out of sight.",
+    photo: PHOTOS.hearingAidIic,
   },
   {
     code: "RIC",
     label: "RIC",
     name: "Receiver in canal",
     text: "The receiver sits inside the canal on a thin wire, while the main body rests discreetly behind the ear.",
+    photo: PHOTOS.hearingAidRic,
   },
   {
     code: "CIC",
     label: "CIC",
     name: "Completely in canal",
     text: "A custom shell that sits entirely within the canal, made to measure from an impression of your ear.",
+    photo: PHOTOS.hearingAidCic,
   },
   {
     code: "RECHARGEABLE",
     label: "Rechargeable",
     name: "Rechargeable hearing aid",
     text: "Charged in their case instead of taking batteries — a format available across several of the styles shown here.",
+    photo: PHOTOS.hearingAidRechargeable,
     highlighted: true,
     badge: "Rechargeable",
   },
@@ -89,12 +94,14 @@ const DEVICE_TYPES: {
     label: "ITC",
     name: "In the canal",
     text: "A slightly larger custom shell that fills the canal opening, with its faceplate where you can reach it.",
+    photo: PHOTOS.hearingAidItc,
   },
   {
     code: "BTE",
     label: "BTE",
     name: "Behind the ear",
     text: "A small body rests behind the ear, joined by a tube to a custom earmould — the largest of the styles.",
+    photo: PHOTOS.hearingAidBte,
   },
 ];
 
@@ -199,7 +206,8 @@ export default async function HearingAidsPage() {
       />
 
       {/* Device types — the six formats the clinic supplies, described plainly
-          and illustrated with original vector art. No model, manufacturer or
+          and shown with the clinic's own photograph of each one, so the picture
+          under every heading is that heading's format. No model, manufacturer or
           specification is claimed anywhere in this section. */}
       <section className="bg-surface-muted">
         <Container className="py-14 sm:py-20">
@@ -225,12 +233,16 @@ export default async function HearingAidsPage() {
                       : "border-border bg-surface shadow-card"
                   }`}
                 >
-                  <div className="relative flex h-40 items-center justify-center overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-brand-50 via-surface to-surface-muted">
-                    <div className="dot-grid absolute inset-0 opacity-40" aria-hidden="true" />
-                    <DeviceTypeArt
-                      type={device.code}
-                      uid={`type-${device.code}`}
-                      className="relative h-36 w-auto"
+                  {/* The clinic's own photo of this format. `object-cover` on a
+                      fixed ratio keeps all six cards the same shape even though
+                      the source frames differ. */}
+                  <div className="relative aspect-[16/10] overflow-hidden rounded-2xl border border-border bg-surface-muted">
+                    <Image
+                      src={device.photo.src}
+                      alt={device.photo.alt}
+                      fill
+                      sizes="(min-width: 1024px) 24rem, (min-width: 640px) 44vw, 88vw"
+                      className="object-cover"
                     />
                     {device.badge ? (
                       <span className="absolute right-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-brand-800 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.12em] text-white shadow-card">

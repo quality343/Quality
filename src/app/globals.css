@@ -47,6 +47,12 @@
   --color-surface: #ffffff;
   --color-surface-muted: #f6f8fb;
   --color-border: #e3e9f1;
+  /* The Home page's continuous section field. Deeper than surface-muted, and
+   * tinted enough to read as a colour rather than as white — that is the whole
+   * point of it: stacked sections then read as one surface with the white cards
+   * sitting on top, instead of a run of blank white bands. Checked against
+   * ink-500 body text: 4.62:1, and against ink-600 at 7.0:1 — both clear AA. */
+  --color-field: #e6eef8;
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system,
     "Segoe UI", sans-serif;
@@ -187,10 +193,17 @@
     linear-gradient(135deg, var(--color-brand-900) 0%, var(--color-brand-800) 55%, var(--color-brand-700) 100%);
 }
 
-/* Soft tinted band for alternating sections. */
+/* Soft tinted band for alternating sections. Starts from the muted surface, not
+ * white, so it can follow a muted section without leaving a bright seam. */
 .bg-tint-gradient {
-  background-image: linear-gradient(180deg, var(--color-surface) 0%, var(--color-brand-50) 100%);
+  background-image: linear-gradient(180deg, var(--color-surface-muted) 0%, var(--color-brand-50) 100%);
 }
+
+/* The Home page's section field is the `field` colour token above — every light
+ * section uses Tailwind's `bg-field`, which never returns to white. The gaps
+ * between sections then read as breathing room inside one continuous surface
+ * rather than as empty white bands. White cards and dark bands still separate
+ * the content, so hierarchy and contrast are untouched. */
 
 /* Soft light band — for sections that would otherwise be a plain white block.
  * A gentle brand tint that returns to white at *both* edges, so stacked

@@ -196,29 +196,22 @@ export default async function HomePage() {
               </Button>
             </div>
 
-            <dl className="mt-9 flex flex-wrap items-center gap-x-7 gap-y-3 text-sm text-brand-100/85">
-              <div className="flex items-center gap-2.5">
-                {/* WhatsApp glyph, not a phone: the number opens the chat. */}
-                <SocialIcon id="whatsapp" className="h-4 w-4 text-brand-200" />
-                <dt className="sr-only">WhatsApp</dt>
-                <dd>
-                  <a
-                    href={WHATSAPP.href}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    aria-label={`Chat with ${CLIENT.name} on WhatsApp (opens in a new tab)`}
-                    className="font-semibold text-white underline-offset-4 hover:underline"
-                  >
-                    {CLIENT.phone}
-                  </a>
-                </dd>
-              </div>
-              <div className="flex items-center gap-2.5">
-                <Icon name="map-pin" className="h-4 w-4 text-brand-200" />
-                <dt className="sr-only">Clinic</dt>
-                <dd>KPHB Phase 1, Kukatpally, Hyderabad</dd>
-              </div>
-            </dl>
+            {/* One contact line only. The clinic's address is a section of its
+                own further down — repeating it here crowded the hero without
+                telling a visitor anything they act on. */}
+            <p className="mt-9 flex items-center gap-2.5 text-sm text-brand-100/85">
+              {/* WhatsApp glyph, not a phone: the number opens the chat. */}
+              <SocialIcon id="whatsapp" className="h-4 w-4 text-brand-200" />
+              <a
+                href={WHATSAPP.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Chat with ${CLIENT.name} on WhatsApp (opens in a new tab)`}
+                className="font-semibold text-white underline-offset-4 hover:underline"
+              >
+                {CLIENT.phone}
+              </a>
+            </p>
           </div>
 
           {/* Portrait — the human centrepiece beside the headline. The
@@ -246,17 +239,25 @@ export default async function HomePage() {
 
         {/* Soft transition into the light sections below. */}
         <div
-          className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-b from-transparent to-surface-muted"
+          className="absolute inset-x-0 bottom-0 h-20 bg-gradient-to-b from-transparent to-field"
           aria-hidden="true"
         />
       </section>
 
       {/* ══ 2. TRUST HIGHLIGHTS ═══════════════════════════════════════ */}
-      <section className="bg-surface-muted">
-        <Container className="pb-16 pt-6 sm:pb-20">
-          <div className="grid gap-px overflow-hidden rounded-3xl border border-border bg-border shadow-card sm:grid-cols-2 lg:grid-cols-4">
+      <section className="bg-field">
+        <Container className="pb-9 pt-4 sm:pb-11">
+          {/* Four separate cards, not one welded slab: on a phone the old
+              hairline-joined block read as a single tall white column, which
+              was most of what made this band look empty. Gaps let the section
+              tint through and keep each point distinct. */}
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {TRUST.map((item, i) => (
-              <Reveal key={item.title} delay={i * 70} className="bg-surface p-7 sm:p-8">
+              <Reveal
+                key={item.title}
+                delay={i * 70}
+                className="rounded-3xl border border-border bg-surface p-6 shadow-card sm:p-7"
+              >
                 <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-50 to-brand-100 text-brand-700 ring-1 ring-brand-100">
                   <Icon name={item.icon} className="h-5 w-5" />
                 </span>
@@ -271,7 +272,7 @@ export default async function HomePage() {
       </section>
 
       {/* ══ 3. PHOTOGRAPHIC BAND — the human reason ═══════════════════ */}
-      <section className="bg-surface-muted pb-16 sm:pb-20">
+      <section className="bg-field pb-12 sm:pb-14">
         <Container>
           <Reveal>
             <div className="relative overflow-hidden rounded-[2rem] shadow-float">
@@ -323,8 +324,8 @@ export default async function HomePage() {
       </section>
 
       {/* ══ 4. HEARING TESTS & SERVICES (editorial) ═══════════════════ */}
-      <section className="bg-tint-gradient">
-        <Container className="py-16 sm:py-24">
+      <section className="bg-field">
+        <Container className="py-12 sm:py-16">
           <Reveal className="max-w-3xl">
             <p className="eyebrow text-brand-700">Hearing tests &amp; services</p>
             <h2 className="headline mt-3 text-3xl text-ink-900 sm:text-4xl lg:text-[2.9rem]">
@@ -337,7 +338,7 @@ export default async function HomePage() {
             </p>
           </Reveal>
 
-          <div className="mt-10 grid gap-6 lg:grid-cols-[1.15fr_1fr] lg:items-stretch">
+          <div className="mt-8 grid gap-6 lg:grid-cols-[1.15fr_1fr] lg:items-stretch">
             {/* Featured panel — the audiogram explainer */}
             <Reveal className="h-full">
               <div className="bg-hero relative flex h-full flex-col overflow-hidden rounded-3xl border border-brand-900/20 p-7 text-white shadow-float sm:p-9">
@@ -477,7 +478,7 @@ export default async function HomePage() {
           }}
           aria-hidden="true"
         />
-        <Container className="relative py-16 sm:py-24">
+        <Container className="relative py-12 sm:py-16">
           <Reveal className="flex flex-wrap items-end justify-between gap-6">
             <div className="max-w-2xl">
               <p className="eyebrow text-brand-200">Hearing aids</p>
@@ -502,7 +503,7 @@ export default async function HomePage() {
           {featured.length === 0 ? (
             /* No client-approved models published yet: explain what we fit
                and how fitting works instead of inventing products. */
-            <Reveal className="mt-10">
+            <Reveal className="mt-8">
               <div className="grid gap-10 lg:grid-cols-[0.95fr_1.05fr] lg:items-center">
                 {/* The clinic's own slow turntable of a device, in the slot the
                     drawn render used to fill. Same box, same glow behind it. */}
@@ -587,7 +588,7 @@ export default async function HomePage() {
             </Reveal>
           ) : (
             <>
-              <div className="mt-10 grid gap-6 md:grid-cols-3">
+              <div className="mt-8 grid gap-6 md:grid-cols-3">
                 {featured.map((model, i) => (
                   <Reveal key={model.id} delay={i * 90}>
                     <article className="product-zoom group flex h-full flex-col overflow-hidden rounded-3xl border border-white/10 bg-white/[0.04] shadow-glow backdrop-blur-sm transition-all duration-300 hover:-translate-y-1 hover:border-white/25">
@@ -663,7 +664,7 @@ export default async function HomePage() {
           )}
 
           {/* Detail photograph — a real device on a real ear. */}
-          <Reveal className="mt-12">
+          <Reveal className="mt-9">
             <div className="overflow-hidden rounded-3xl border border-white/10">
               <Photo
                 source={PHOTOS.hearingAidDetail}
@@ -690,8 +691,8 @@ export default async function HomePage() {
       </section>
 
       {/* ══ 6. HOME CONSULTATION (warm accent band) ══════════════════ */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-accent-50 via-surface to-brand-50">
-        <Container className="py-16 sm:py-24">
+      <section className="bg-field">
+        <Container className="py-12 sm:py-16">
           <Reveal>
             <div className="overflow-hidden rounded-[2rem] border border-border bg-surface shadow-float">
               <div className="grid gap-0 lg:grid-cols-[1.02fr_0.98fr]">
@@ -766,8 +767,8 @@ export default async function HomePage() {
       </section>
 
       {/* ══ 7. SHARED SIGNS — interactive self-check ═════════════════ */}
-      <section className="bg-band-soft">
-        <Container className="py-16 sm:py-24">
+      <section className="bg-field">
+        <Container className="py-12 sm:py-16">
           <Reveal className="max-w-3xl">
             <p className="eyebrow text-brand-700">Signs to look out for</p>
             <h2 className="headline mt-3 text-3xl text-ink-900 sm:text-4xl lg:text-[2.9rem]">
@@ -787,8 +788,8 @@ export default async function HomePage() {
       </section>
 
       {/* ══ 8. THE PROCESS ═══════════════════════════════════════════ */}
-      <section className="bg-surface-muted">
-        <Container className="py-16 sm:py-24">
+      <section className="bg-field">
+        <Container className="py-12 sm:py-16">
           <div className="grid gap-10 lg:grid-cols-[1fr_0.72fr] lg:items-start">
             <div>
               <Reveal className="max-w-2xl">
@@ -798,7 +799,7 @@ export default async function HomePage() {
                 </h2>
               </Reveal>
 
-              <ol className="mt-12 grid gap-8 sm:grid-cols-2">
+              <ol className="mt-9 grid gap-8 sm:grid-cols-2">
                 {PROCESS.map((step, i) => (
                   <Reveal as="li" key={step.title} delay={i * 90} className="relative">
                     <span className="flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-brand-600 to-brand-800 text-white shadow-card">
@@ -839,8 +840,8 @@ export default async function HomePage() {
       </section>
 
       {/* ══ 9. ABOUT ═════════════════════════════════════════════════ */}
-      <section className="bg-tint-gradient">
-        <Container className="grid gap-10 py-16 sm:py-24 lg:grid-cols-[1fr_0.92fr] lg:items-center">
+      <section className="bg-field">
+        <Container className="grid gap-10 py-12 sm:py-16 lg:grid-cols-[1fr_0.92fr] lg:items-center">
           <Reveal>
             <p className="eyebrow text-brand-700">About the clinic</p>
             <h2 className="headline mt-3 text-3xl text-ink-900 sm:text-4xl lg:text-[2.9rem]">
@@ -886,8 +887,8 @@ export default async function HomePage() {
       </section>
 
       {/* ══ 10. FAQ ══════════════════════════════════════════════════ */}
-      <section className="bg-band-soft">
-        <Container className="py-16 sm:py-24">
+      <section className="bg-field">
+        <Container className="py-12 sm:py-16">
           <div className="grid gap-10 lg:grid-cols-[0.85fr_1.35fr] lg:items-start">
             <Reveal>
               <p className="eyebrow text-brand-700">Questions</p>
@@ -945,8 +946,8 @@ export default async function HomePage() {
       </section>
 
       {/* ══ 11. CONTACT & LOCATION ═══════════════════════════════════ */}
-      <section className="bg-surface-muted">
-        <Container className="py-16 sm:py-24">
+      <section className="bg-field">
+        <Container className="py-12 sm:py-16">
           <Reveal>
             <div className="overflow-hidden rounded-3xl border border-border bg-surface shadow-card">
               <div className="grid lg:grid-cols-2">
@@ -959,7 +960,10 @@ export default async function HomePage() {
                     overlay
                   >
                     <div className="flex h-full flex-col justify-end p-8 sm:p-10">
-                      <p className="eyebrow text-brand-200">Our Hyderabad clinic</p>
+                      {/* Caption describes the care shown, not the premises —
+                          this is a stock photograph, so it must not read as a
+                          picture of the clinic itself. */}
+                      <p className="eyebrow text-brand-200">Our approach</p>
                       <p className="mt-2 font-display text-xl font-semibold leading-snug text-white">
                         One clinic, one team — and home visits across the city.
                       </p>
@@ -1081,7 +1085,7 @@ export default async function HomePage() {
           aria-hidden="true"
         />
 
-        <Container className="relative flex flex-col items-start gap-8 py-16 sm:py-20 lg:flex-row lg:items-center lg:justify-between">
+        <Container className="relative flex flex-col items-start gap-8 py-12 sm:py-16 lg:flex-row lg:items-center lg:justify-between">
           {/* Copy comes from the `finalCta` video slot so the section and the
               video content cannot drift apart. */}
           <Reveal>
