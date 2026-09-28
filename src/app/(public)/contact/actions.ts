@@ -4,15 +4,17 @@
  * Public contact-form action — the one remaining public write path now that the
  * online booking flow has been retired.
  *
- * No session is required, so the action is rate-limited, Zod-validated and
- * server-side only. Nothing here claims an email was sent: the enquiry is
- * stored for the clinic team to pick up.
+ * The form itself sends nothing: it opens WhatsApp with the visitor's text
+ * pre-filled, and the visitor presses Send there. This action exists purely to
+ * keep a record of the enquiry for the clinic, so a visitor who cannot complete
+ * the WhatsApp handoff is still reachable. Nothing here claims an email or a
+ * WhatsApp message was sent — the UI says "Continue in WhatsApp" for that
+ * reason.
  */
 
 import { prisma } from "@/server/db/prisma";
 import { hit as rateLimitHit } from "@/lib/rate-limit";
-import { fieldErrors, mobileSchema } from "@/lib/validation/scheduling";
-import { z } from "zod";
+import { checkContactEnquiry } from "@/lib/validation/contact";
 
 export type ContactEnquiryResult =
   | { ok: true }
@@ -23,23 +25,10 @@ function limited(scope: string, key: string, limit: number, windowMs: number): b
   return rateLimitHit(`${scope}:${key}`, limit, windowMs);
 }
 
-const enquirySchema = z.object({
-  name: z.string().trim().min(2, "Name is required").max(120),
-  mobile: mobileSchema,
-  email: z
-    .union([z.literal(""), z.string().trim().toLowerCase().email("Enter a valid email")])
-    .optional()
-    .transform((v) => v || undefined),
-  interest: z.string().trim().max(60).optional().transform((v) => v || undefined),
-  appointmentType: z
-    .enum(["CLINIC_VISIT", "HOME_CONSULTATION", "GENERAL"])
-    .optional(),
-  message: z.string().trim().min(5, "Message is required").max(2000, "Message is too long"),
-});
-
 /**
- * Public contact-form submission. No email backend is configured, so the
- * enquiry is stored for admin review — nothing claims an email was sent.
+ * Record a contact-form enquiry. Validation runs against the same schema the
+ * browser used, so a hand-crafted call cannot store anything the form would
+ * have rejected.
  */
 export async function submitContactEnquiry(
   input: unknown,
@@ -47,16 +36,12 @@ export async function submitContactEnquiry(
   if (!limited("contact-enquiry", "global", 10, 60_000)) {
     return { ok: false, error: "Too many submissions. Please wait a minute and try again." };
   }
-  const parsed = enquirySchema.safeParse(input);
-  if (!parsed.success) {
-    return {
-      ok: false,
-      error: "Please correct the highlighted fields.",
-      fieldErrors: fieldErrors(parsed.error),
-    };
+  const checked = checkContactEnquiry(input);
+  if (!checked.ok) {
+    return { ok: false, error: checked.error, fieldErrors: checked.fieldErrors };
   }
   try {
-    await prisma.contactEnquiry.create({ data: parsed.data });
+    await prisma.contactEnquiry.create({ data: checked.data });
     return { ok: true };
   } catch (err) {
     console.error("[contact-enquiry] failed", { message: (err as Error).message });

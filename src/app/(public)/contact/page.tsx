@@ -10,7 +10,7 @@ import { ContactForm } from "./ContactForm";
 export const metadata = {
   title: "Contact — QUALITY Hearing Care, Kukatpally, Hyderabad",
   description:
-    "Call 9966111188 or email qualityhearing.pro@gmail.com. Visit us at KPHB Phase 1, Kukatpally, Hyderabad. Send us a message and our team will get back to you.",
+    "Call 9966111188 or email qualityhearing.pro@gmail.com. Visit us at KPHB Phase 1, Kukatpally, Hyderabad. Fill in the form and we'll open WhatsApp with your message ready to send.",
   alternates: { canonical: "/contact" },
 };
 
@@ -25,7 +25,7 @@ export default function ContactPage() {
             Talk to our <span className="text-gradient-light">team</span>
           </>
         }
-        description="Questions about hearing tests, hearing aids, or home consultations? Call, email, or send us a message — we're happy to help you work out what you need."
+        description="Questions about hearing tests, hearing aids, or home consultations? Call, email, or start a WhatsApp message — we're happy to help you work out what you need."
         actions={
           <>
             <Button
@@ -93,8 +93,9 @@ export default function ContactPage() {
               <div className="rounded-3xl border border-border bg-surface p-8 shadow-card sm:p-10">
                 <h2 className="headline text-2xl text-ink-900">Send us a message</h2>
                 <p className="mt-2 text-sm leading-relaxed text-ink-500">
-                  We read every message. For the fastest answer, message us on
-                  WhatsApp on{" "}
+                  Fill this in and we&apos;ll open WhatsApp with your details
+                  written for you — press Send there to reach us. For the fastest
+                  answer, message us on WhatsApp on{" "}
                   <a
                     href={WHATSAPP.href}
                     target="_blank"
@@ -152,11 +153,12 @@ export default function ContactPage() {
                   <div className="dot-grid absolute inset-0 opacity-50" aria-hidden="true" />
                   <div className="relative">
                     <h2 className="font-display text-lg font-semibold tracking-tight">
-                      Message us instead
+                      Message us on WhatsApp
                     </h2>
                     <p className="mt-2 text-sm leading-relaxed text-brand-100/80">
-                      Know what you need? Send us a message on WhatsApp and our
-                      team will take it from there. No account required.
+                      Know what you need? WhatsApp opens in a new tab with your
+                      request written for you — press Send and our team will
+                      take it from there. No account required.
                     </p>
                     <div className="mt-5 flex flex-col gap-3">
                       <Button

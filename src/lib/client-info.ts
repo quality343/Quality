@@ -133,3 +133,36 @@ export const whatsappEnquiry = (subject: string) =>
   WHATSAPP.withMessage(
     `Hello QUALITY Hearing Care, I would like to know more about ${subject}.`,
   );
+
+/**
+ * What the contact form collects, once validated.
+ *
+ * `interest` and `about` are already human-readable labels ("Hearing Aids",
+ * "Home Consultation") — the message is read by the clinic in WhatsApp, so it
+ * never carries internal codes.
+ */
+export type ContactFormSummary = {
+  name: string;
+  mobile: string;
+  interest?: string;
+  about?: string;
+  message: string;
+};
+
+/**
+ * The text the contact form pre-fills in WhatsApp. The site never sends it: the
+ * visitor presses Send inside WhatsApp, so this only has to be easy to read and
+ * to answer. Optional fields are omitted rather than shown as blank.
+ */
+export function contactFormMessage(summary: ContactFormSummary): string {
+  const lines = [
+    "Hello QUALITY Hearing Care,",
+    "",
+    `My name is ${summary.name}.`,
+    `My phone number is ${summary.mobile}.`,
+  ];
+  if (summary.interest) lines.push(`I am interested in ${summary.interest}.`);
+  if (summary.about) lines.push(`This is about: ${summary.about}`);
+  lines.push("", "Message:", summary.message, "", "Thank you.");
+  return lines.join("\n");
+}
