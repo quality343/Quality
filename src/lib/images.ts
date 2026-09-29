@@ -200,12 +200,15 @@ export const PHOTOS = {
     alt: "Two custom in-the-canal hearing aids showing their battery doors, and one seated at the opening of an ear canal",
   },
 
-  /** Body moulded to sit behind the ear, with the custom earmould beside it. */
+  /**
+   * Body that sits behind the ear, joined by a clear tube to a clear custom
+   * earmould — shown on its own and worn on an ear.
+   */
   hearingAidBte: {
     src: "/images/hearing-aid-bte.jpg",
     width: 1200,
     height: 800,
-    alt: "A behind-the-ear hearing aid shown next to its custom skin-toned earmould",
+    alt: "A behind-the-ear hearing aid: its body rests behind the ear and a clear tube runs to a custom earmould, shown on its own and worn on an ear",
   },
 
   /** Aids docked in an open charging case with the charge indicators lit. */

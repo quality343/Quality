@@ -68,6 +68,14 @@ which duplicated this site's own copy and was illegible at card size. The crop
 keeps only the photograph (the aid on a fingertip and the ear beside it). The
 other five are used as supplied, resized to 1200px on the long edge.
 
+The BTE file comes from the supplied frame `15.08.51 (2)`, the only frame in the
+set that shows the format the card describes: a body sitting **behind the pinna**,
+joined by a clear tube to a clear custom earmould, photographed on its own and
+worn on an ear. It replaced an earlier assignment to frame `15.08.50` — a dark
+body standing beside a skin-toned mould — which read as an in-ear/custom-mould
+device rather than a behind-the-ear aid. That frame is now unused and is not
+published.
+
 If a card image ever looks like the wrong format, the fix is one line in
 `src/lib/images.ts` — tell the clinic which supplied file belongs to which card
 and swap the `src`.
